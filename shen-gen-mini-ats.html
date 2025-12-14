@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>shen-gen • Mini ATS (TR/EN)</title>
+  <style>
+    :root{
+      --bg:#060a18; --text:#eaf0ff; --muted:#9fb0e6; --line:rgba(255,255,255,.12);
+      --card:rgba(255,255,255,.03); --card2:rgba(10,14,30,.40);
+      --ok:#26d07c; --warn:#ffcc00; --bad:#ff5a5f; --accent:#6ea8ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(110,168,255,.25), transparent 55%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(38,208,124,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      background: rgba(6,10,24,.82); backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .wrap{max-width:1280px; margin:0 auto; padding:14px 16px}
+    .top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, rgba(110,168,255,.95), rgba(38,208,124,.92)); box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{margin:0; font-size:22px; letter-spacing:.4px; text-transform:lowercase}
+    .tag{display:block; margin-top:2px; font-size:12px; color:var(--muted)}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03); font-size:12px; color:var(--muted)}
+    .pill b{color:var(--text)}
+    select, input, textarea, button{font:inherit}
+    main{max-width:1280px; margin:0 auto; padding:16px}
+    .tabs{display:flex; flex-wrap:wrap; gap:8px}
+    .tab{padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+      cursor:pointer; font-weight:800; color:var(--muted)}
+    .tab.active{background: rgba(110,168,255,.18); border-color: rgba(110,168,255,.45); color:var(--text)}
+    .grid{display:grid; gap:12px; grid-template-columns:1fr 1fr}
+    @media (max-width:1100px){.grid{grid-template-columns:1fr}}
+    .card{border-radius:16px; border:1px solid var(--line); background: linear-gradient(180deg, var(--card), rgba(255,255,255,.01));
+      padding:14px; box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .card h2{margin:0 0 10px; font-size:14px; color:#dfe6ff}
+    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%; border-radius:12px; border:1px solid var(--line); background: var(--card2); color:var(--text);
+      padding:10px 12px; outline:none;
+    }
+    textarea{min-height:92px; resize:vertical; line-height:1.35}
+    .row{display:grid; gap:10px; grid-template-columns:1fr 1fr}
+    @media (max-width:720px){.row{grid-template-columns:1fr}}
+    .btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    button{border:0; border-radius:12px; padding:10px 12px; cursor:pointer; font-weight:900;
+      background: rgba(110,168,255,.18); color:var(--text); border:1px solid rgba(110,168,255,.35)}
+    button.primary{background: linear-gradient(135deg, rgba(110,168,255,.95), rgba(110,168,255,.55)); border-color: rgba(110,168,255,.55); color:#071022}
+    button.ghost{background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.12)}
+    .muted{color:var(--muted); font-size:12px; line-height:1.4}
+    .hr{height:1px; background: rgba(255,255,255,.08); margin:12px 0}
+    .list{border:1px solid var(--line); background: rgba(10,14,30,.35); border-radius:16px; padding:12px}
+    .list h3{margin:0 0 8px; font-size:13px; color:#dfe6ff}
+    .table{width:100%; border-collapse:collapse; font-size:12px; overflow:hidden; border-radius:14px; border:1px solid var(--line)}
+    .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08); padding:10px; text-align:left; vertical-align:top}
+    .table th{color:#cfe0ff; background: rgba(255,255,255,.03)}
+    .table tr:last-child td{border-bottom:0}
+    .pill2{display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.04); font-size:11px}
+    .pill2.ok{border-color:rgba(38,208,124,.45)}
+    .pill2.warn{border-color:rgba(255,204,0,.45)}
+    .pill2.bad{border-color:rgba(255,90,95,.45)}
+    .hl{background: rgba(255,204,0,.22); padding:0 2px; border-radius:4px}
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .chip{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14); background: rgba(110,168,255,.14); font-size:12px}
+    .chip button{padding:0; border:0; background:transparent; color:var(--text); cursor:pointer; font-weight:900}
+    .board{display:grid; gap:10px; grid-template-columns:repeat(6, 1fr)}
+    @media (max-width:1200px){.board{grid-template-columns:repeat(3, 1fr)}}
+    @media (max-width:720px){.board{grid-template-columns:1fr}}
+    .col{border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.02); border-radius:16px; padding:10px; min-height:240px}
+    .col h4{margin:0 0 8px; font-size:12px; color:#dfe6ff}
+    .candCard{border:1px solid rgba(255,255,255,.12); background: rgba(10,14,30,.35); border-radius:14px; padding:10px; margin-top:8px; cursor:grab}
+    .candCard b{display:block; font-size:12px}
+    .candMeta{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+    .score{font-weight:900}
+    .qaGrid{display:grid; gap:10px}
+    .qaCard{border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.02); border-radius:14px; padding:10px}
+    .qaTop{display:flex; justify-content:space-between; gap:10px; align-items:center}
+    .tiny{font-size:11px; color:var(--muted)}
+    .footer{max-width:1280px; margin:0 auto; padding:0 16px 20px; color:var(--muted); font-size:11px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>shen-gen</h1>
+          <span class="tag" id="tagline">Mini ATS • Kanıtlı Screening • Pipeline • Compare • TR/EN</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+        <span class="pill"><span id="modeLbl">Mod</span>: <b id="modeVal">Deterministik</b></span>
+        <span class="pill"><span id="outLbl">Çıktı</span>: <b id="outVal">Kanıtlı</b></span>
+        <select id="lang" style="max-width:160px">
+          <option value="tr">Türkçe</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+    <div class="tabs" style="margin-top:12px">
+      <div class="tab active" data-tab="jobs" id="tabJobs">Jobs</div>
+      <div class="tab" data-tab="candidates" id="tabCand">Candidates</div>
+      <div class="tab" data-tab="match" id="tabMatch">Match & Rank</div>
+      <div class="tab" data-tab="pipeline" id="tabPipe">Pipeline</div>
+      <div class="tab" data-tab="compare" id="tabCompare">Compare</div>
+      <div class="tab" data-tab="audit" id="tabAudit">Audit</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- JOBS -->
+  <section class="page" id="page-jobs">
+    <div class="grid">
+      <div class="card">
+        <h2 id="jobCreateTitle">Job Create</h2>
+        <label id="jobTitleLbl">Job title</label>
+        <input id="jobTitle" placeholder="Örn: Senior Business Analyst"/>
+
+        <div class="row">
+          <div>
+            <label id="jobGroupLbl">Job group</label>
+            <select id="jobGroup">
+              <option value="auto">Auto</option>
+              <option value="tech">Tech</option>
+              <option value="product">Product/BA/PO</option>
+              <option value="sales">Sales</option>
+              <option value="finance">Finance</option>
+              <option value="ops">Ops</option>
+            </select>
+          </div>
+          <div>
+            <label id="jobLocLbl">Location (optional)</label>
+            <input id="jobLoc" placeholder="İstanbul / Remote"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label id="mustLbl">Must-have (comma)</label>
+            <input id="jobMust" placeholder="SQL, API, Agile, BPMN"/>
+          </div>
+          <div>
+            <label id="niceLbl">Nice-to-have (comma)</label>
+            <input id="jobNice" placeholder="Jira, Confluence, Postman"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label id="redLbl">Red flags (comma)</label>
+            <input id="jobRed" placeholder="fake, plagiarism"/>
+          </div>
+          <div>
+            <label id="minYearsLbl">Min years</label>
+            <input id="jobMinYears" type="number" min="0" step="1" placeholder="5"/>
+          </div>
+        </div>
+
+        <label id="qSetLbl">Question set (one per line)</label>
+        <textarea id="jobQs" placeholder="Liderlik kanıtı var mı?
+API entegrasyon tecrübesi var mı?
+KYC/AML deneyimi var mı?"></textarea>
+
+        <div class="btns">
+          <button class="primary" id="saveJob">Save Job</button>
+          <button class="ghost" id="jobTemplate">Template</button>
+          <button class="ghost" id="resetJob">Reset</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="muted" id="jobNote">
+          Not: Boolean alışkanlığı olan recruiter’lar için kriterler “comma” ile giriliyor; istersen sonraki sürümde UI Boolean Builder ekleriz. :contentReference[oaicite:4]{index=4}
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="jobListTitle">Jobs</h2>
+        <div class="list">
+          <h3 id="jobSelectLbl">Select job</h3>
+          <select id="jobSelect"></select>
+          <div class="btns">
+            <button class="ghost" id="deleteJob">Delete</button>
+            <button class="ghost" id="cloneJob">Clone</button>
+          </div>
+          <div class="hr"></div>
+          <div class="muted" id="jobDetail">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CANDIDATES -->
+  <section class="page" id="page-candidates" style="display:none">
+    <div class="grid">
+      <div class="card">
+        <h2 id="candCreateTitle">Candidate Create</h2>
+        <label id="candNameLbl">Full name</label>
+        <input id="candName" placeholder="Aday adı"/>
+
+        <div class="row">
+          <div>
+            <label id="candSourceLbl">Source</label>
+            <input id="candSource" placeholder="LinkedIn / Referral / Application"/>
+          </div>
+          <div>
+            <label id="candTagsLbl">Tags (comma)</label>
+            <input id="candTags" placeholder="Senior, Remote, FinTech"/>
+          </div>
+        </div>
+
+        <label id="cvTextLbl">CV text</label>
+        <textarea id="candCV" placeholder="CV metnini yapıştır..."></textarea>
+
+        <label id="liTextLbl">LinkedIn text</label>
+        <textarea id="candLI" placeholder="LinkedIn About/Experience metnini yapıştır..."></textarea>
+
+        <div class="btns">
+          <button class="primary" id="saveCand">Save Candidate</button>
+          <button class="ghost" id="resetCand">Reset</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="muted" id="candNote">
+          Scorecard/structured evaluation yaklaşımı “tutarlı ve denetlenebilir” değerlendirme sağlar. :contentReference[oaicite:5]{index=5}
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="candListTitle">Candidates</h2>
+        <div class="list">
+          <h3 id="candSelectLbl">Select candidate</h3>
+          <select id="candSelect"></select>
+          <div class="btns">
+            <button class="ghost" id="deleteCand">Delete</button>
+          </div>
+          <div class="hr"></div>
+          <div class="muted" id="candDetail">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MATCH -->
+  <section class="page" id="page-match" style="display:none">
+    <div class="grid">
+      <div class="card">
+        <h2 id="matchTitle">Match & Rank</h2>
+        <div class="row">
+          <div>
+            <label id="matchJobLbl">Job</label>
+            <select id="matchJob"></select>
+          </div>
+          <div>
+            <label id="matchWeightsLbl">Weights</label>
+            <div class="row">
+              <input id="wMust" type="number" min="1" step="1" value="12" title="Must"/>
+              <input id="wNice" type="number" min="1" step="1" value="5" title="Nice"/>
+            </div>
+            <div class="row">
+              <input id="wYears" type="number" min="0" step="1" value="8" title="Years"/>
+              <input id="wRed" type="number" min="0" step="1" value="10" title="Red penalty"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="primary" id="runMatch">Run Matching</button>
+          <button class="ghost" id="pushShortlist">Push Top 3 → Shortlist</button>
+          <button class="ghost" id="exportShortlist">Export Shortlist CSV</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="list">
+          <h3 id="rankLbl">Ranking</h3>
+          <div id="ranking" class="muted">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="matchDetailTitle">Evidence & QA</h2>
+        <div class="list">
+          <h3 id="pickAppLbl">Pick candidate from ranking</h3>
+          <select id="appSelect"></select>
+
+          <div class="hr"></div>
+          <div id="scoreBadge" class="muted">—</div>
+
+          <div class="hr"></div>
+          <h3 id="qaLbl">Q&A (Evidence-based)</h3>
+          <div id="qaHost" class="qaGrid"></div>
+
+          <div class="hr"></div>
+          <h3 id="eviLbl">Scorecard Evidence</h3>
+          <table class="table" id="eviTable">
+            <thead><tr><th>Criterion</th><th>Status</th><th>Evidence</th></tr></thead>
+            <tbody><tr><td colspan="3" class="muted">—</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIPELINE -->
+  <section class="page" id="page-pipeline" style="display:none">
+    <div class="card">
+      <h2 id="pipeTitle">Pipeline</h2>
+      <div class="row">
+        <div>
+          <label id="pipeJobLbl">Job</label>
+          <select id="pipeJob"></select>
+        </div>
+        <div>
+          <label id="pipeHintLbl">Hint</label>
+          <div class="muted" id="pipeHint">Drag candidates between stages (logs it).</div>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="board" id="board"></div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section class="page" id="page-compare" style="display:none">
+    <div class="grid">
+      <div class="card">
+        <h2 id="compareTitle">Compare</h2>
+        <label id="cmpJobLbl">Job</label>
+        <select id="cmpJob"></select>
+
+        <div class="row">
+          <div>
+            <label id="cmpALbl">Candidate A</label>
+            <select id="cmpA"></select>
+          </div>
+          <div>
+            <label id="cmpBLbl">Candidate B</label>
+            <select id="cmpB"></select>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="primary" id="runCompare">Compare</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="list">
+          <h3 id="cmpOutLbl">Result</h3>
+          <div id="cmpOut" class="muted">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="cmpQaTitle">Q&A Side-by-side</h2>
+        <div class="row">
+          <div class="list">
+            <h3 id="cmpQaA">A</h3>
+            <div id="cmpQaHostA" class="qaGrid"></div>
+          </div>
+          <div class="list">
+            <h3 id="cmpQaB">B</h3>
+            <div id="cmpQaHostB" class="qaGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUDIT -->
+  <section class="page" id="page-audit" style="display:none">
+    <div class="card">
+      <h2 id="auditTitle">Audit Log</h2>
+      <div class="muted" id="auditNote">
+        İşe alımda otomasyon/AI kullanımı için “şeffaflık + insan gözetimi + dokümantasyon” önemlidir. :contentReference[oaicite:6]{index=6}
+      </div>
+      <div class="hr"></div>
+      <div class="list">
+        <h3 id="auditListLbl">Events</h3>
+        <div id="auditList" class="muted">—</div>
+      </div>
+      <div class="btns">
+        <button class="ghost" id="clearAudit">Clear Audit</button>
+        <button class="ghost" id="clearAll">Reset All Data</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="footer" id="footer">
+  LinkedIn URL’den otomatik çekme MVP’de yok (izin/rate-limit/değişken yapı). İçerik upload/paste en güvenlisi.
+</div>
+
+<script>
+/* =========================
+   i18n
+========================= */
+const I18N = {
+  tr: {
+    tagline:"Mini ATS • Kanıtlı Screening • Pipeline • Compare • TR/EN",
+    modeLbl:"Mod", modeVal:"Deterministik", outLbl:"Çıktı", outVal:"Kanıtlı",
+    tabs:{jobs:"Jobs", candidates:"Candidates", match:"Match & Rank", pipeline:"Pipeline", compare:"Compare", audit:"Audit"},
+    jobs:{create:"Job Create", list:"Jobs", select:"Select job", title:"Job title", group:"Job group", loc:"Location (optional)",
+      must:"Must-have (comma)", nice:"Nice-to-have (comma)", red:"Red flags (comma)", years:"Min years", qs:"Question set (one per line)",
+      save:"Save Job", tpl:"Template", reset:"Reset", del:"Delete", clone:"Clone"},
+    cand:{create:"Candidate Create", list:"Candidates", select:"Select candidate", name:"Full name", source:"Source", tags:"Tags (comma)",
+      cv:"CV text", li:"LinkedIn text", save:"Save Candidate", reset:"Reset", del:"Delete"},
+    match:{title:"Match & Rank", job:"Job", weights:"Weights", run:"Run Matching", push:"Push Top 3 → Shortlist", export:"Export Shortlist CSV",
+      ranking:"Ranking", pick:"Pick candidate from ranking", qa:"Q&A (Evidence-based)", evi:"Scorecard Evidence"},
+    pipe:{title:"Pipeline", job:"Job", hint:"Drag candidates between stages (logs it).",
+      stages:["New","Screened","Shortlist","Interview","Offer","Rejected"]},
+    cmp:{title:"Compare", job:"Job", a:"Candidate A", b:"Candidate B", run:"Compare", out:"Result", qa:"Q&A Side-by-side"},
+    audit:{title:"Audit Log", list:"Events", clear:"Clear Audit", resetAll:"Reset All Data"},
+    status:{fit:"Fit", review:"Review", weak:"Weak match", confirmed:"Confirmed", likely:"Likely", notfound:"Not found"},
+    misc:{none:"—", notFound:"Metinde bulunamadı (veri eksik olabilir).", footer:"LinkedIn URL’den otomatik çekme MVP’de yok (izin/rate-limit/değişken yapı). İçerik upload/paste en güvenlisi."}
+  },
+  en: {
+    tagline:"Mini ATS • Evidence-based Screening • Pipeline • Compare • TR/EN",
+    modeLbl:"Mode", modeVal:"Deterministic", outLbl:"Output", outVal:"Evidence-based",
+    tabs:{jobs:"Jobs", candidates:"Candidates", match:"Match & Rank", pipeline:"Pipeline", compare:"Compare", audit:"Audit"},
+    jobs:{create:"Create Job", list:"Jobs", select:"Select job", title:"Job title", group:"Job group", loc:"Location (optional)",
+      must:"Must-have (comma)", nice:"Nice-to-have (comma)", red:"Red flags (comma)", years:"Min years", qs:"Question set (one per line)",
+      save:"Save Job", tpl:"Template", reset:"Reset", del:"Delete", clone:"Clone"},
+    cand:{create:"Create Candidate", list:"Candidates", select:"Select candidate", name:"Full name", source:"Source", tags:"Tags (comma)",
+      cv:"CV text", li:"LinkedIn text", save:"Save Candidate", reset:"Reset", del:"Delete"},
+    match:{title:"Match & Rank", job:"Job", weights:"Weights", run:"Run Matching", push:"Push Top 3 → Shortlist", export:"Export Shortlist CSV",
+      ranking:"Ranking", pick:"Pick candidate from ranking", qa:"Q&A (Evidence-based)", evi:"Scorecard Evidence"},
+    pipe:{title:"Pipeline", job:"Job", hint:"Drag candidates between stages (logged).",
+      stages:["New","Screened","Shortlist","Interview","Offer","Rejected"]},
+    cmp:{title:"Compare", job:"Job", a:"Candidate A", b:"Candidate B", run:"Compare", out:"Result", qa:"Q&A Side-by-side"},
+    audit:{title:"Audit Log", list:"Events", clear:"Clear Audit", resetAll:"Reset All Data"},
+    status:{fit:"Fit", review:"Review", weak:"Weak match", confirmed:"Confirmed", likely:"Likely", notfound:"Not found"},
+    misc:{none:"—", notFound:"Not found in text (data may be missing).", footer:"No LinkedIn URL fetch in MVP (permissions/rate limits/layout changes). Upload/paste content is safest."}
+  }
+};
+let LANG = "tr";
+function t(path){
+  const parts = path.split(".");
+  let cur = I18N[LANG];
+  for(const p of parts){ cur = cur?.[p]; }
+  return cur ?? path;
+}
+function applyLang(){
+  document.getElementById("tagline").textContent = t("tagline");
+  document.getElementById("modeLbl").textContent = t("modeLbl");
+  document.getElementById("modeVal").textContent = t("modeVal");
+  document.getElementById("outLbl").textContent = t("outLbl");
+  document.getElementById("outVal").textContent = t("outVal");
+
+  // tabs
+  document.getElementById("tabJobs").textContent = t("tabs.jobs");
+  document.getElementById("tabCand").textContent = t("tabs.candidates");
+  document.getElementById("tabMatch").textContent = t("tabs.match");
+  document.getElementById("tabPipe").textContent = t("tabs.pipeline");
+  document.getElementById("tabCompare").textContent = t("tabs.compare");
+  document.getElementById("tabAudit").textContent = t("tabs.audit");
+
+  // jobs labels
+  document.getElementById("jobCreateTitle").textContent = t("jobs.create");
+  document.getElementById("jobListTitle").textContent = t("jobs.list");
+  document.getElementById("jobSelectLbl").textContent = t("jobs.select");
+  document.getElementById("jobTitleLbl").textContent = t("jobs.title");
+  document.getElementById("jobGroupLbl").textContent = t("jobs.group");
+  document.getElementById("jobLocLbl").textContent = t("jobs.loc");
+  document.getElementById("mustLbl").textContent = t("jobs.must");
+  document.getElementById("niceLbl").textContent = t("jobs.nice");
+  document.getElementById("redLbl").textContent = t("jobs.red");
+  document.getElementById("minYearsLbl").textContent = t("jobs.years");
+  document.getElementById("qSetLbl").textContent = t("jobs.qs");
+  document.getElementById("saveJob").textContent = t("jobs.save");
+  document.getElementById("jobTemplate").textContent = t("jobs.tpl");
+  document.getElementById("resetJob").textContent = t("jobs.reset");
+  document.getElementById("deleteJob").textContent = t("jobs.del");
+  document.getElementById("cloneJob").textContent = t("jobs.clone");
+
+  // candidate labels
+  document.getElementById("candCreateTitle").textContent = t("cand.create");
+  document.getElementById("candListTitle").textContent = t("cand.list");
+  document.getElementById("candSelectLbl").textContent = t("cand.select");
+  document.getElementById("candNameLbl").textContent = t("cand.name");
+  document.getElementById("candSourceLbl").textContent = t("cand.source");
+  document.getElementById("candTagsLbl").textContent = t("cand.tags");
+  document.getElementById("cvTextLbl").textContent = t("cand.cv");
+  document.getElementById("liTextLbl").textContent = t("cand.li");
+  document.getElementById("saveCand").textContent = t("cand.save");
+  document.getElementById("resetCand").textContent = t("cand.reset");
+  document.getElementById("deleteCand").textContent = t("cand.del");
+
+  // match labels
+  document.getElementById("matchTitle").textContent = t("match.title");
+  document.getElementById("matchJobLbl").textContent = t("match.job");
+  document.getElementById("matchWeightsLbl").textContent = t("match.weights");
+  document.getElementById("runMatch").textContent = t("match.run");
+  document.getElementById("pushShortlist").textContent = t("match.push");
+  document.getElementById("exportShortlist").textContent = t("match.export");
+  document.getElementById("rankLbl").textContent = t("match.ranking");
+  document.getElementById("pickAppLbl").textContent = t("match.pick");
+  document.getElementById("qaLbl").textContent = t("match.qa");
+  document.getElementById("eviLbl").textContent = t("match.evi");
+
+  // pipeline labels
+  document.getElementById("pipeTitle").textContent = t("pipe.title");
+  document.getElementById("pipeJobLbl").textContent = t("pipe.job");
+  document.getElementById("pipeHint").textContent = t("pipe.hint");
+
+  // compare labels
+  document.getElementById("compareTitle").textContent = t("cmp.title");
+  document.getElementById("cmpJobLbl").textContent = t("cmp.job");
+  document.getElementById("cmpALbl").textContent = t("cmp.a");
+  document.getElementById("cmpBLbl").textContent = t("cmp.b");
+  document.getElementById("runCompare").textContent = t("cmp.run");
+  document.getElementById("cmpOutLbl").textContent = t("cmp.out");
+  document.getElementById("cmpQaTitle").textContent = t("cmp.qa");
+
+  // audit
+  document.getElementById("auditTitle").textContent = t("audit.title");
+  document.getElementById("auditListLbl").textContent = t("audit.list");
+  document.getElementById("clearAudit").textContent = t("audit.clear");
+  document.getElementById("clearAll").textContent = t("audit.resetAll");
+
+  document.getElementById("footer").textContent = t("misc.footer");
+}
+
+/* =========================
+   Storage
+========================= */
+const KEY = "shen_gen_mini_ats_v1";
+function loadDB(){
+  const raw = localStorage.getItem(KEY);
+  if(raw) return JSON.parse(raw);
+  // seed minimal
+  return { jobs:[], candidates:[], applications:[], audit:[] };
+}
+function saveDB(){
+  localStorage.setItem(KEY, JSON.stringify(DB));
+}
+let DB = loadDB();
+
+function uid(prefix){
+  return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+}
+function nowISO(){ return new Date().toISOString(); }
+function logAudit(action, entityType, entityId, before, after){
+  DB.audit.unshift({ id:uid("aud"), ts:nowISO(), action, entityType, entityId, before, after });
+  saveDB();
+  renderAudit();
+}
+
+/* =========================
+   Utils
+========================= */
+const $ = (id)=>document.getElementById(id);
+function csvToList(s){ return (s||"").split(",").map(x=>x.trim()).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i); }
+function norm(s){ return (s||"").toLowerCase().replace(/\s+/g," ").trim(); }
+function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+function escapeHtml(str){ return (str||"").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
+function findEvidence(text, keyword){
+  const raw = text || "";
+  const idx = norm(raw).indexOf(norm(keyword));
+  if(idx === -1) return "";
+  const start = Math.max(0, idx - 90);
+  const end = Math.min(raw.length, idx + keyword.length + 90);
+  return raw.slice(start, end).replace(/\s+/g," ").trim();
+}
+function highlightSnippet(snippet, q){
+  if(!snippet) return "";
+  const qq = (q||"").trim();
+  if(!qq) return escapeHtml(snippet);
+  const tokens = qq.split(/\s+/).filter(Boolean).slice(0,8);
+  let out = escapeHtml(snippet);
+  for(const tok of tokens){
+    const re = new RegExp(tok.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+    out = out.replace(re, (m)=>`<span class="hl">${m}</span>`);
+  }
+  return out;
+}
+function extractYears(text){
+  const tN = norm(text);
+  const m1 = tN.match(/(\d{1,2})\s*(yıl|years|year)\b/);
+  if(m1) return parseInt(m1[1],10);
+  const years = [...tN.matchAll(/\b(19\d{2}|20\d{2})\b/g)].map(m=>parseInt(m[1],10));
+  if(years.length >= 2){
+    const minY = Math.min(...years), maxY = Math.max(...years);
+    const diff = maxY - minY;
+    if(diff >= 1 && diff <= 40) return diff;
+  }
+  return null;
+}
+
+/* =========================
+   Synonyms (tiny MVP)
+========================= */
+const SYN = {
+  global: {
+    "agile":["scrum","kanban","sprint","retrospective","standup"],
+    "api":["rest","soap","graphql","endpoint","swagger","openapi"],
+    "sql":["postgres","oracle","mssql","mysql","query","sorgu"],
+    "leadership":["team lead","takım lideri","managed","yönetti","mentoring","mentorluk"],
+    "crm":["salesforce","dynamics","hubspot","müşteri ilişkileri"],
+    "kpi":["okr","okrs","metrics","hedef","performans"],
+    "kyc":["aml","masak","know your customer","kimlik doğrulama","nfc","liveness"],
+    "devops":["ci/cd","pipeline","docker","kubernetes","terraform","helm"]
+  },
+  tech: {
+    "javascript":["js","typescript","ts","node","react","vue","angular"],
+    "microservices":["kafka","event-driven","rabbitmq","service mesh"],
+    "cloud":["aws","azure","gcp","k8s","kubernetes"]
+  },
+  product: {
+    "bpmn":["process modeling","süreç modelleme","uml","workflow"],
+    "product owner":["po","ürün sahibi","backlog","roadmap","discovery","mvp"]
+  },
+  sales: {
+    "pipeline":["lead","prospecting","qualification","closing","crm"],
+    "marketing":["seo","performance marketing","growth","acquisition"]
+  },
+  finance: {
+    "reporting":["financial statements","bilanço","gelir tablosu","ifrs","gaap"],
+    "risk":["credit risk","market risk","var","stress test","compliance"]
+  },
+  ops: {
+    "support":["ticket","sla","incident","itil","problem management"],
+    "operations":["reconciliation","mutabakat","settlement","back office"]
+  }
+};
+function getSynPack(jobGroup){
+  const base = {...SYN.global};
+  const extra = SYN[jobGroup] || {};
+  for(const k of Object.keys(extra)){
+    base[k] = (base[k] || []).concat(extra[k]);
+  }
+  return base;
+}
+
+/* =========================
+   Screening: QA + Scorecard
+========================= */
+function answerQuestion(combinedText, q, synPack){
+  const tN = norm(combinedText);
+  const exact = findEvidence(combinedText, q);
+  if(exact){
+    return { level:"ok", label:t("status.confirmed"), evidence: exact };
+  }
+  // token evidence
+  const tokens = (q||"").toLowerCase().split(/[^a-z0-9ğüşöçıİĞÜŞÖÇ]+/i).map(x=>x.trim()).filter(x=>x.length>=3);
+  for(const tok of tokens){
+    if(tN.includes(tok)){
+      const ev = findEvidence(combinedText, tok);
+      return { level:"ok", label:t("status.confirmed"), evidence: ev || "" };
+    }
+  }
+  // synonym-based likely if question hints a key
+  const qN = norm(q);
+  for(const key of Object.keys(synPack)){
+    const variants = [key].concat(synPack[key]||[]);
+    const hitInQ = variants.some(v=> qN.includes(norm(v)));
+    if(hitInQ){
+      for(const v of variants){
+        if(tN.includes(norm(v))){
+          const ev = findEvidence(combinedText, v);
+          return { level:"warn", label:t("status.likely"), evidence: ev || "" };
+        }
+      }
+    }
+  }
+  return { level:"bad", label:t("status.notfound"), evidence:"" };
+}
+
+function scorecard(job, candidate, weights){
+  const combined = (candidate.cvText||"") + "\n" + (candidate.liText||"");
+  const combinedN = norm(combined);
+
+  const must = job.must || [];
+  const nice = job.nice || [];
+  const red  = job.red  || [];
+
+  const evidence = [];
+  let mustHit=0, niceHit=0, redHit=0;
+
+  for(const k of must){
+    const hit = combinedN.includes(norm(k));
+    if(hit) mustHit++;
+    evidence.push({type:"Must", key:k, hit, ev: hit ? findEvidence(combined, k) : ""});
+  }
+  for(const k of nice){
+    const hit = combinedN.includes(norm(k));
+    if(hit) niceHit++;
+    evidence.push({type:"Nice", key:k, hit, ev: hit ? findEvidence(combined, k) : ""});
+  }
+  for(const k of red){
+    const hit = combinedN.includes(norm(k));
+    if(hit) redHit++;
+    evidence.push({type:"Red", key:k, hit, ev: hit ? findEvidence(combined, k) : ""});
+  }
+
+  const years = extractYears(combined);
+  const minYears = Number(job.minYears || 0);
+  const loc = norm(job.location || "");
+  const locOk = loc ? combinedN.includes(loc) : true;
+
+  const mustCount = must.length || 0;
+  const niceCount = nice.length || 0;
+  const mustRatio = mustCount ? (mustHit/mustCount) : 0.60;
+  const niceRatio = niceCount ? (niceHit/niceCount) : 0.40;
+
+  let points=0, max=0;
+  const mustBlock = weights.wMust * (mustCount ? mustCount : 5);
+  max += mustBlock; points += mustBlock * mustRatio;
+
+  const niceBlock = weights.wNice * (niceCount ? niceCount : 6);
+  max += niceBlock; points += niceBlock * niceRatio;
+
+  max += weights.wYears;
+  if(minYears>0){
+    if(years==null) points += weights.wYears*0.35;
+    else points += (years>=minYears) ? weights.wYears : weights.wYears * clamp(years/minYears,0,1);
+  } else points += weights.wYears*0.6;
+
+  max += 4;
+  points += loc ? (locOk ? 4 : 1.5) : 2.5;
+
+  points -= (redHit * weights.wRed);
+
+  const score = clamp(Math.round((points/max)*100),0,100);
+
+  // status bucket
+  let bucket = t("status.weak");
+  if(score >= 75) bucket = t("status.fit");
+  else if(score >= 55) bucket = t("status.review");
+
+  return { score, bucket, meta:{mustHit,mustCount,niceHit,niceCount,redHit,years,locOk}, evidence };
+}
+
+function buildQA(job, candidate){
+  const syn = getSynPack(job.group || "auto");
+  const combined = (candidate.cvText||"") + "\n" + (candidate.liText||"");
+  const qs = job.questions || [];
+  const out = qs.map(q=>{
+    const a = answerQuestion(combined, q, syn);
+    return { q, ...a };
+  });
+  return out;
+}
+
+/* =========================
+   Rendering: dropdowns
+========================= */
+function renderJobs(){
+  const sel = $("jobSelect");
+  const m1 = $("matchJob");
+  const p1 = $("pipeJob");
+  const c1 = $("cmpJob");
+  [sel,m1,p1,c1].forEach(s=>{ s.innerHTML=""; });
+
+  if(!DB.jobs.length){
+    const opt = document.createElement("option");
+    opt.value=""; opt.textContent = t("misc.none");
+    [sel,m1,p1,c1].forEach(s=> s.appendChild(opt.cloneNode(true)));
+    $("jobDetail").textContent = t("misc.none");
+    return;
+  }
+  DB.jobs.forEach(j=>{
+    const opt = document.createElement("option");
+    opt.value=j.id; opt.textContent = j.title;
+    [sel,m1,p1,c1].forEach(s=> s.appendChild(opt.cloneNode(true)));
+  });
+  // keep selection
+  if(!sel.value) sel.value = DB.jobs[0].id;
+  if(!m1.value) m1.value = DB.jobs[0].id;
+  if(!p1.value) p1.value = DB.jobs[0].id;
+  if(!c1.value) c1.value = DB.jobs[0].id;
+  renderJobDetail();
+}
+
+function renderJobDetail(){
+  const id = $("jobSelect").value;
+  const j = DB.jobs.find(x=>x.id===id);
+  if(!j){ $("jobDetail").textContent = t("misc.none"); return; }
+  $("jobDetail").innerHTML =
+    `<b>${escapeHtml(j.title)}</b><br>
+     group: ${escapeHtml(j.group||"auto")} • minYears: ${escapeHtml(String(j.minYears||0))} • location: ${escapeHtml(j.location||"")}<br>
+     must: ${escapeHtml((j.must||[]).join(", "))}<br>
+     nice: ${escapeHtml((j.nice||[]).join(", "))}<br>
+     red: ${escapeHtml((j.red||[]).join(", "))}<br>
+     questions: ${escapeHtml((j.questions||[]).length.toString())}`;
+}
+
+function renderCandidates(){
+  const sel = $("candSelect");
+  sel.innerHTML="";
+  if(!DB.candidates.length){
+    const opt = document.createElement("option");
+    opt.value=""; opt.textContent=t("misc.none");
+    sel.appendChild(opt);
+    $("candDetail").textContent=t("misc.none");
+    return;
+  }
+  DB.candidates.forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value=c.id; opt.textContent=c.name || "(no name)";
+    sel.appendChild(opt);
+  });
+  if(!sel.value) sel.value = DB.candidates[0].id;
+  renderCandDetail();
+}
+
+function renderCandDetail(){
+  const id = $("candSelect").value;
+  const c = DB.candidates.find(x=>x.id===id);
+  if(!c){ $("candDetail").textContent=t("misc.none"); return; }
+  $("candDetail").innerHTML =
+    `<b>${escapeHtml(c.name||"")}</b><br>
+     source: ${escapeHtml(c.source||"")}<br>
+     tags: ${escapeHtml((c.tags||[]).join(", "))}<br>
+     cv chars: ${(c.cvText||"").length} • li chars: ${(c.liText||"").length}`;
+}
+
+function ensureApplication(jobId, candId){
+  let a = DB.applications.find(x=>x.jobId===jobId && x.candId===candId);
+  if(!a){
+    a = { id:uid("app"), jobId, candId, stage:"New", score:null, bucket:null, qa:[], evidence:[], updatedAt:nowISO() };
+    DB.applications.push(a);
+    saveDB();
+    logAudit("APPLICATION_CREATE","Application",a.id,null,a);
+  }
+  return a;
+}
+
+/* =========================
+   MATCH & RANK
+========================= */
+let LAST_RANK = []; // {appId, candId, score}
+function runMatching(){
+  const jobId = $("matchJob").value;
+  const job = DB.jobs.find(j=>j.id===jobId);
+  if(!job){ $("ranking").textContent=t("misc.none"); return; }
+
+  const weights = {
+    wMust:Number($("wMust").value||12),
+    wNice:Number($("wNice").value||5),
+    wYears:Number($("wYears").value||8),
+    wRed:Number($("wRed").value||10)
+  };
+
+  const ranked = [];
+  DB.candidates.forEach(c=>{
+    const app = ensureApplication(job.id, c.id);
+    const before = {...app};
+    const sc = scorecard(job, c, weights);
+    const qa = buildQA(job, c);
+
+    app.score = sc.score;
+    app.bucket = sc.bucket;
+    app.evidence = sc.evidence;
+    app.qa = qa;
+    app.updatedAt = nowISO();
+
+    ranked.push({appId:app.id, candId:c.id, score:sc.score, bucket:sc.bucket});
+    logAudit("MATCH_RUN","Application",app.id,before,app);
+  });
+
+  ranked.sort((a,b)=>b.score-a.score);
+  LAST_RANK = ranked;
+
+  // render ranking list
+  $("ranking").innerHTML = ranked.map((r,i)=>{
+    const c = DB.candidates.find(x=>x.id===r.candId);
+    return `<div class="candCard" data-app="${r.appId}">
+      <b>#${i+1} ${escapeHtml(c?.name||"")}</b>
+      <div class="candMeta">
+        <span class="pill2 ok">${escapeHtml(String(r.score))}</span>
+        <span class="pill2 warn">${escapeHtml(r.bucket||"")}</span>
+      </div>
+    </div>`;
+  }).join("") || t("misc.none");
+
+  // appSelect
+  const aSel = $("appSelect");
+  aSel.innerHTML="";
+  ranked.forEach(r=>{
+    const c = DB.candidates.find(x=>x.id===r.candId);
+    const opt = document.createElement("option");
+    opt.value = r.appId;
+    opt.textContent = `${c?.name||""} • ${r.score}`;
+    aSel.appendChild(opt);
+  });
+  if(ranked.length) aSel.value = ranked[0].appId;
+
+  renderAppDetail();
+}
+
+function renderAppDetail(){
+  const appId = $("appSelect").value;
+  const app = DB.applications.find(x=>x.id===appId);
+  if(!app){ $("scoreBadge").textContent=t("misc.none"); return; }
+  const cand = DB.candidates.find(c=>c.id===app.candId);
+  $("scoreBadge").innerHTML = `<b>${escapeHtml(cand?.name||"")}</b> • score: <span class="score">${escapeHtml(String(app.score))}</span> • ${escapeHtml(app.bucket||"")}`;
+
+  // QA
+  const qaHost = $("qaHost");
+  qaHost.innerHTML = "";
+  (app.qa||[]).forEach(item=>{
+    const cls = item.level==="ok" ? "ok" : item.level==="warn" ? "warn" : "bad";
+    const ev = item.evidence ? highlightSnippet(item.evidence, item.q) : `<span class="muted">${t("misc.notFound")}</span>`;
+    qaHost.innerHTML += `
+      <div class="qaCard">
+        <div class="qaTop">
+          <b>${escapeHtml(item.q)}</b>
+          <span class="pill2 ${cls}">${escapeHtml(item.label)}</span>
+        </div>
+        <div class="tiny" style="margin-top:8px">${ev}</div>
+      </div>`;
+  });
+
+  // Evidence table
+  const tbody = $("eviTable").querySelector("tbody");
+  tbody.innerHTML = "";
+  (app.evidence||[]).forEach(r=>{
+    const cls = r.hit ? "ok" : (r.type==="Red" ? "warn" : "bad");
+    const status = r.hit ? (r.type==="Red" ? "⚠️" : "✅") : (r.type==="Red" ? "—" : "❌");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="pill2 ${r.type==="Red" ? "warn": ""}">${escapeHtml(r.type)}</span> <b>${escapeHtml(r.key)}</b></td>
+      <td><span class="pill2 ${cls}">${status}</span></td>
+      <td class="tiny">${r.hit ? highlightSnippet((r.ev||"").slice(0,220), r.key) : ""}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function pushTop3ToShortlist(){
+  const jobId = $("matchJob").value;
+  const top = LAST_RANK.slice(0,3);
+  top.forEach(r=>{
+    const app = DB.applications.find(x=>x.id===r.appId);
+    if(!app) return;
+    const before = {...app};
+    app.stage = "Shortlist";
+    app.updatedAt = nowISO();
+    logAudit("STAGE_SET","Application",app.id,before,app);
+  });
+  saveDB();
+  renderPipeline();
+}
+
+function exportShortlistCSV(){
+  const jobId = $("matchJob").value;
+  const job = DB.jobs.find(j=>j.id===jobId);
+  const apps = DB.applications.filter(a=>a.jobId===jobId && a.stage==="Shortlist");
+  const rows = [["Job","Candidate","Score","Bucket","Stage","Source","Tags"]];
+
+  apps.forEach(a=>{
+    const c = DB.candidates.find(x=>x.id===a.candId);
+    rows.push([job?.title||"", c?.name||"", String(a.score||""), a.bucket||"", a.stage, c?.source||"", (c?.tags||[]).join("|")]);
+  });
+
+  const csv = rows.map(r=>r.map(cell=>{
+    const s = (cell||"").toString().replace(/"/g,'""');
+    return `"${s}"`;
+  }).join(",")).join("\n");
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `shen-gen_shortlist_${(job?.title||"job").replace(/\s+/g,"_")}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* =========================
+   PIPELINE
+========================= */
+function renderPipeline(){
+  const jobId = $("pipeJob").value;
+  const job = DB.jobs.find(j=>j.id===jobId);
+  const stages = t("pipe.stages");
+  const board = $("board");
+  board.innerHTML = "";
+
+  stages.forEach(stage=>{
+    const col = document.createElement("div");
+    col.className = "col";
+    col.dataset.stage = stage;
+    col.innerHTML = `<h4>${escapeHtml(stage)}</h4><div class="muted tiny">${escapeHtml(job?.title||"")}</div>`;
+    col.addEventListener("dragover", e=>e.preventDefault());
+    col.addEventListener("drop", (e)=>{
+      e.preventDefault();
+      const appId = e.dataTransfer.getData("text/appId");
+      const app = DB.applications.find(x=>x.id===appId);
+      if(!app) return;
+      const before = {...app};
+      app.stage = stage;
+      app.updatedAt = nowISO();
+      saveDB();
+      logAudit("STAGE_DRAGDROP","Application",app.id,before,app);
+      renderPipeline();
+    });
+
+    const apps = DB.applications.filter(a=>a.jobId===jobId && a.stage===stage)
+      .sort((a,b)=>(b.score||0)-(a.score||0));
+    apps.forEach(a=>{
+      const c = DB.candidates.find(x=>x.id===a.candId);
+      const card = document.createElement("div");
+      card.className = "candCard";
+      card.draggable = true;
+      card.addEventListener("dragstart", (e)=>{ e.dataTransfer.setData("text/appId", a.id); });
+      card.innerHTML = `<b>${escapeHtml(c?.name||"")}</b>
+        <div class="candMeta">
+          <span class="pill2 ok">${escapeHtml(String(a.score ?? ""))}</span>
+          <span class="pill2 warn">${escapeHtml(a.bucket||"")}</span>
+        </div>`;
+      col.appendChild(card);
+    });
+
+    board.appendChild(col);
+  });
+}
+
+/* =========================
+   COMPARE
+========================= */
+function renderCompareDropdowns(){
+  const jobId = $("cmpJob").value;
+  const aSel = $("cmpA"), bSel = $("cmpB");
+  aSel.innerHTML = ""; bSel.innerHTML = "";
+  const apps = DB.applications.filter(a=>a.jobId===jobId).sort((x,y)=>(y.score||0)-(x.score||0));
+  apps.forEach(app=>{
+    const c = DB.candidates.find(x=>x.id===app.candId);
+    const opt = document.createElement("option");
+    opt.value = app.id;
+    opt.textContent = `${c?.name||""} • ${app.score ?? ""} • ${app.stage}`;
+    aSel.appendChild(opt.cloneNode(true));
+    bSel.appendChild(opt.cloneNode(true));
+  });
+  if(apps.length){
+    aSel.value = apps[0].id;
+    bSel.value = apps[Math.min(1, apps.length-1)].id;
+  }
+}
+
+function runCompare(){
+  const jobId = $("cmpJob").value;
+  const aId = $("cmpA").value;
+  const bId = $("cmpB").value;
+  const appA = DB.applications.find(x=>x.id===aId);
+  const appB = DB.applications.find(x=>x.id===bId);
+  if(!appA || !appB){ $("cmpOut").textContent=t("misc.none"); return; }
+
+  const candA = DB.candidates.find(c=>c.id===appA.candId);
+  const candB = DB.candidates.find(c=>c.id===appB.candId);
+
+  if(appA.score === appB.score){
+    $("cmpOut").textContent = t("cmp.equal") || "Equal";
+  }else{
+    const win = appA.score > appB.score ? candA?.name : candB?.name;
+    $("cmpOut").innerHTML = `<span class="pill2 ok">${escapeHtml(win||"")}</span> • ${escapeHtml(String(appA.score))} vs ${escapeHtml(String(appB.score))}`;
+  }
+
+  // QA side-by-side
+  $("cmpQaA").textContent = (candA?.name||"A");
+  $("cmpQaB").textContent = (candB?.name||"B");
+
+  function renderQA(host, qa){
+    host.innerHTML = "";
+    (qa||[]).forEach(item=>{
+      const cls = item.level==="ok" ? "ok" : item.level==="warn" ? "warn" : "bad";
+      const ev = item.evidence ? highlightSnippet(item.evidence, item.q) : `<span class="muted">${t("misc.notFound")}</span>`;
+      host.innerHTML += `<div class="qaCard">
+        <div class="qaTop"><b>${escapeHtml(item.q)}</b><span class="pill2 ${cls}">${escapeHtml(item.label)}</span></div>
+        <div class="tiny" style="margin-top:8px">${ev}</div>
+      </div>`;
+    });
+  }
+  renderQA($("cmpQaHostA"), appA.qa);
+  renderQA($("cmpQaHostB"), appB.qa);
+}
+
+/* =========================
+   AUDIT
+========================= */
+function renderAudit(){
+  const host = $("auditList");
+  if(!DB.audit.length){ host.textContent = t("misc.none"); return; }
+  host.innerHTML = DB.audit.slice(0,80).map(e=>{
+    return `<div class="candCard">
+      <b>${escapeHtml(e.action)}</b>
+      <div class="tiny">${escapeHtml(e.ts)} • ${escapeHtml(e.entityType)}:${escapeHtml(e.entityId)}</div>
+    </div>`;
+  }).join("");
+}
+
+/* =========================
+   Actions: Save/Delete
+========================= */
+function saveJob(){
+  const job = {
+    id: uid("job"),
+    title: $("jobTitle").value.trim() || "Untitled Job",
+    group: $("jobGroup").value,
+    location: $("jobLoc").value.trim(),
+    must: csvToList($("jobMust").value),
+    nice: csvToList($("jobNice").value),
+    red: csvToList($("jobRed").value),
+    minYears: Number($("jobMinYears").value || 0),
+    questions: ($("jobQs").value||"").split("\n").map(x=>x.trim()).filter(Boolean),
+    createdAt: nowISO()
+  };
+  DB.jobs.push(job);
+  saveDB();
+  logAudit("JOB_CREATE","Job",job.id,null,job);
+  renderJobs();
+  $("jobSelect").value = job.id;
+  renderJobDetail();
+}
+
+function deleteJob(){
+  const id = $("jobSelect").value;
+  const job = DB.jobs.find(j=>j.id===id);
+  if(!job) return;
+  DB.jobs = DB.jobs.filter(j=>j.id!==id);
+  // also remove applications for that job
+  DB.applications = DB.applications.filter(a=>a.jobId!==id);
+  saveDB();
+  logAudit("JOB_DELETE","Job",id,job,null);
+  renderJobs(); renderCandidates();
+}
+
+function cloneJob(){
+  const id = $("jobSelect").value;
+  const job = DB.jobs.find(j=>j.id===id);
+  if(!job) return;
+  const copy = {...job, id:uid("job"), title: job.title + " (copy)", createdAt:nowISO()};
+  DB.jobs.push(copy);
+  saveDB();
+  logAudit("JOB_CLONE","Job",copy.id,null,copy);
+  renderJobs();
+  $("jobSelect").value = copy.id;
+  renderJobDetail();
+}
+
+function jobTemplate(){
+  $("jobTitle").value = "Senior Business Analyst";
+  $("jobGroup").value = "product";
+  $("jobLoc").value = "Istanbul / Remote";
+  $("jobMust").value = "business analysis, user story, acceptance criteria, BPMN, API, SQL, stakeholder";
+  $("jobNice").value = "Jira, Confluence, Postman, microservices, KYC, AML";
+  $("jobRed").value = "fake, plagiarism, unrelated";
+  $("jobMinYears").value = 5;
+  $("jobQs").value =
+`Liderlik / ekip yönetimi kanıtı var mı?
+API entegrasyon tecrübesi var mı?
+KYC/AML/MASAK benzeri tecrübe var mı?
+Jira/Confluence gibi araçlar geçmiş mi?`;
+}
+
+function resetJob(){
+  ["jobTitle","jobLoc","jobMust","jobNice","jobRed","jobMinYears","jobQs"].forEach(id=>$(id).value="");
+  $("jobGroup").value="auto";
+}
+
+function saveCandidate(){
+  const cand = {
+    id: uid("cand"),
+    name: $("candName").value.trim() || "Unnamed",
+    source: $("candSource").value.trim(),
+    tags: csvToList($("candTags").value),
+    cvText: $("candCV").value || "",
+    liText: $("candLI").value || "",
+    createdAt: nowISO()
+  };
+  DB.candidates.push(cand);
+  saveDB();
+  logAudit("CAND_CREATE","Candidate",cand.id,null,cand);
+  renderCandidates();
+  $("candSelect").value = cand.id;
+  renderCandDetail();
+}
+
+function deleteCandidate(){
+  const id = $("candSelect").value;
+  const cand = DB.candidates.find(c=>c.id===id);
+  if(!cand) return;
+  DB.candidates = DB.candidates.filter(c=>c.id!==id);
+  DB.applications = DB.applications.filter(a=>a.candId!==id);
+  saveDB();
+  logAudit("CAND_DELETE","Candidate",id,cand,null);
+  renderCandidates(); renderJobs();
+}
+
+function resetCandidate(){
+  ["candName","candSource","candTags","candCV","candLI"].forEach(id=>$(id).value="");
+}
+
+function clearAudit(){
+  DB.audit = [];
+  saveDB();
+  renderAudit();
+}
+function clearAll(){
+  localStorage.removeItem(KEY);
+  DB = loadDB();
+  renderAll();
+}
+
+/* =========================
+   Tabs
+========================= */
+function showTab(name){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
+  document.querySelector(`.tab[data-tab="${name}"]`)?.classList.add("active");
+  document.getElementById("page-"+name).style.display = "block";
+  // per-page refresh
+  if(name==="jobs") renderJobDetail();
+  if(name==="candidates") renderCandDetail();
+  if(name==="pipeline") renderPipeline();
+  if(name==="compare") renderCompareDropdowns();
+  if(name==="match") {} // keep last
+  if(name==="audit") renderAudit();
+}
+document.querySelectorAll(".tab").forEach(el=>{
+  el.addEventListener("click", ()=>showTab(el.dataset.tab));
+});
+
+/* =========================
+   Wiring
+========================= */
+$("lang").addEventListener("change", (e)=>{ LANG = e.target.value; applyLang(); renderAll(); });
+
+$("saveJob").addEventListener("click", saveJob);
+$("deleteJob").addEventListener("click", deleteJob);
+$("cloneJob").addEventListener("click", cloneJob);
+$("jobTemplate").addEventListener("click", jobTemplate);
+$("resetJob").addEventListener("click", resetJob);
+$("jobSelect").addEventListener("change", ()=>{ renderJobDetail(); });
+
+$("saveCand").addEventListener("click", saveCandidate);
+$("deleteCand").addEventListener("click", deleteCandidate);
+$("resetCand").addEventListener("click", resetCandidate);
+$("candSelect").addEventListener("change", ()=>{ renderCandDetail(); });
+
+$("runMatch").addEventListener("click", runMatching);
+$("appSelect").addEventListener("change", renderAppDetail);
+$("pushShortlist").addEventListener("click", pushTop3ToShortlist);
+$("exportShortlist").addEventListener("click", exportShortlistCSV);
+
+$("pipeJob").addEventListener("change", renderPipeline);
+
+$("cmpJob").addEventListener("change", renderCompareDropdowns);
+$("runCompare").addEventListener("click", runCompare);
+
+$("clearAudit").addEventListener("click", clearAudit);
+$("clearAll").addEventListener("click", clearAll);
+
+/* =========================
+   Initial render
+========================= */
+function renderAll(){
+  applyLang();
+  renderJobs();
+  renderCandidates();
+  renderAudit();
+
+  // sync job selects
+  $("matchJob").innerHTML = $("jobSelect").innerHTML;
+  $("pipeJob").innerHTML = $("jobSelect").innerHTML;
+  $("cmpJob").innerHTML = $("jobSelect").innerHTML;
+
+  // default selections
+  if($("jobSelect").value){
+    $("matchJob").value = $("jobSelect").value;
+    $("pipeJob").value = $("jobSelect").value;
+    $("cmpJob").value = $("jobSelect").value;
+  }
+  renderPipeline();
+  renderCompareDropdowns();
+}
+renderAll();
+showTab("jobs");
+</script>
+</body>
+</html>
