@@ -409,23 +409,105 @@ KYC/AML deneyimi var mı?"></textarea>
 ========================= */
 const I18N = {
   tr: {
-    tagline:"Mini ATS • Kanıtlı Screening • Pipeline • Compare • TR/EN",
-    modeLbl:"Mod", modeVal:"Deterministik", outLbl:"Çıktı", outVal:"Kanıtlı",
-    tabs:{jobs:"Jobs", candidates:"Candidates", match:"Match & Rank", pipeline:"Pipeline", compare:"Compare", audit:"Audit"},
-    jobs:{create:"Job Create", list:"Jobs", select:"Select job", title:"Job title", group:"Job group", loc:"Location (optional)",
-      must:"Must-have (comma)", nice:"Nice-to-have (comma)", red:"Red flags (comma)", years:"Min years", qs:"Question set (one per line)",
-      save:"Save Job", tpl:"Template", reset:"Reset", del:"Delete", clone:"Clone"},
-    cand:{create:"Candidate Create", list:"Candidates", select:"Select candidate", name:"Full name", source:"Source", tags:"Tags (comma)",
-      cv:"CV text", li:"LinkedIn text", save:"Save Candidate", reset:"Reset", del:"Delete"},
-    match:{title:"Match & Rank", job:"Job", weights:"Weights", run:"Run Matching", push:"Push Top 3 → Shortlist", export:"Export Shortlist CSV",
-      ranking:"Ranking", pick:"Pick candidate from ranking", qa:"Q&A (Evidence-based)", evi:"Scorecard Evidence"},
-    pipe:{title:"Pipeline", job:"Job", hint:"Drag candidates between stages (logs it).",
-      stages:["New","Screened","Shortlist","Interview","Offer","Rejected"]},
-    cmp:{title:"Compare", job:"Job", a:"Candidate A", b:"Candidate B", run:"Compare", out:"Result", qa:"Q&A Side-by-side"},
-    audit:{title:"Audit Log", list:"Events", clear:"Clear Audit", resetAll:"Reset All Data"},
-    status:{fit:"Fit", review:"Review", weak:"Weak match", confirmed:"Confirmed", likely:"Likely", notfound:"Not found"},
-    misc:{none:"—", notFound:"Metinde bulunamadı (veri eksik olabilir).", footer:"LinkedIn URL’den otomatik çekme MVP’de yok (izin/rate-limit/değişken yapı). İçerik upload/paste en güvenlisi."}
+  tagline:"Mini ATS • Kanıtlı Ön Eleme • Aday Havuzu • Pipeline • Karşılaştır • TR/EN",
+  modeLbl:"Mod", modeVal:"Deterministik",
+  outLbl:"Çıktı", outVal:"Kanıtlı (Uydurma yok)",
+
+  tabs:{
+    jobs:"Pozisyonlar",
+    candidates:"Adaylar",
+    match:"Eşleştir & Sırala",
+    pipeline:"Süreç (Pipeline)",
+    compare:"Karşılaştır",
+    audit:"Kayıt (Audit)"
   },
+
+  jobs:{
+    create:"Pozisyon Oluştur",
+    list:"Pozisyonlar",
+    select:"Pozisyon Seç",
+    title:"Pozisyon Adı",
+    group:"Pozisyon Grubu",
+    loc:"Lokasyon (opsiyonel)",
+    must:"Olmazsa Olmazlar (virgülle)",
+    nice:"Artı Değerler (virgülle)",
+    red:"Kırmızı Bayraklar (virgülle)",
+    years:"Minimum Deneyim (yıl)",
+    qs:"Soru Seti (her satıra 1 soru)",
+    save:"Pozisyonu Kaydet",
+    tpl:"Şablon",
+    reset:"Temizle",
+    del:"Sil",
+    clone:"Kopyala"
+  },
+
+  cand:{
+    create:"Aday Ekle",
+    list:"Adaylar",
+    select:"Aday Seç",
+    name:"Ad Soyad",
+    source:"Kaynak",
+    tags:"Etiketler (virgülle)",
+    cv:"CV Metni",
+    li:"LinkedIn Metni",
+    save:"Adayı Kaydet",
+    reset:"Temizle",
+    del:"Sil"
+  },
+
+  match:{
+    title:"Eşleştir & Sırala",
+    job:"Pozisyon",
+    weights:"Ağırlıklar",
+    run:"Eşleştirmeyi Çalıştır",
+    push:"İlk 3 Adayı → Kısa Liste’ye Ekle",
+    export:"Kısa Listeyi CSV İndir",
+    ranking:"Sıralama",
+    pick:"Sıralamadan Aday Seç",
+    qa:"Soru-Cevap (Kanıtlı)",
+    evi:"Skor Kartı Kanıtları"
+  },
+
+  pipe:{
+    title:"Süreç (Pipeline)",
+    job:"Pozisyon",
+    hint:"Adayları aşamalar arasında sürükleyip bırakın (kayıt altına alınır).",
+    stages:["Yeni","Ön Eleme","Kısa Liste","Mülakat","Teklif","Reddedildi"]
+  },
+
+  cmp:{
+    title:"Karşılaştır",
+    job:"Pozisyon",
+    a:"Aday A",
+    b:"Aday B",
+    run:"Karşılaştır",
+    out:"Sonuç",
+    qa:"Soru-Cevap Yan Yana"
+  },
+
+  audit:{
+    title:"Kayıt (Audit)",
+    list:"İşlemler",
+    clear:"Kayıtları Temizle",
+    resetAll:"Tüm Veriyi Sıfırla"
+  },
+
+  status:{
+    fit:"Uygun",
+    review:"İncele",
+    weak:"Zayıf Eşleşme",
+    confirmed:"Kanıtlı",
+    likely:"Muhtemel",
+    notfound:"Bulunamadı"
+  },
+
+  misc:{
+    none:"—",
+    notFound:"Metinde bulunamadı (veri eksik olabilir).",
+    footer:"LinkedIn URL’den otomatik çekme MVP’de yok (izin/rate-limit/yapı değişken). En güvenlisi metin yapıştırma/yükleme."
+  }
+},
+
   en: {
     tagline:"Mini ATS • Evidence-based Screening • Pipeline • Compare • TR/EN",
     modeLbl:"Mode", modeVal:"Deterministic", outLbl:"Output", outVal:"Evidence-based",
@@ -531,6 +613,20 @@ function applyLang(){
   document.getElementById("clearAll").textContent = t("audit.resetAll");
 
   document.getElementById("footer").textContent = t("misc.footer");
+  
+  // placeholders (TR/EN)
+document.getElementById("jobTitle").placeholder = (LANG==="tr") ? "Örn: Kıdemli İş Analisti" : "e.g. Senior Business Analyst";
+document.getElementById("jobLoc").placeholder   = (LANG==="tr") ? "İstanbul / Uzaktan" : "Istanbul / Remote";
+document.getElementById("jobMust").placeholder  = (LANG==="tr") ? "Örn: SQL, API, Agile, BPMN" : "e.g. SQL, API, Agile, BPMN";
+document.getElementById("jobNice").placeholder  = (LANG==="tr") ? "Örn: Jira, Confluence, Postman" : "e.g. Jira, Confluence, Postman";
+document.getElementById("jobRed").placeholder   = (LANG==="tr") ? "Örn: sahte, intihal" : "e.g. fake, plagiarism";
+
+document.getElementById("candName").placeholder   = (LANG==="tr") ? "Aday adı soyadı" : "Candidate full name";
+document.getElementById("candSource").placeholder = (LANG==="tr") ? "LinkedIn / Referans / Başvuru" : "LinkedIn / Referral / Application";
+document.getElementById("candTags").placeholder   = (LANG==="tr") ? "Örn: Senior, Remote, FinTech" : "e.g. Senior, Remote, FinTech";
+document.getElementById("candCV").placeholder     = (LANG==="tr") ? "CV metnini yapıştır..." : "Paste CV text...";
+document.getElementById("candLI").placeholder     = (LANG==="tr") ? "LinkedIn About/Experience metnini yapıştır..." : "Paste LinkedIn About/Experience text...";
+
 }
 
 /* =========================
