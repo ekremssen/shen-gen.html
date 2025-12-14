@@ -1,2672 +1,982 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>shen-gen • Mini ATS</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AdayIQ Pro • Mini ATS</title>
 
-  <!-- PDF & DOCX parsers (client-side) -->
-  <!-- pdf.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.js"></script>
-  <!-- mammoth (docx->text) -->
-  <script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- PDF.js (PDF text extraction) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.js" crossorigin="anonymous"></script>
+  <!-- Mammoth (DOCX text extraction) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js" crossorigin="anonymous"></script>
 
   <style>
     :root{
-      --bg:#060a18; --text:#eaf0ff; --muted:#9fb0e6;
-      --line:rgba(255,255,255,.12);
-      --card:rgba(255,255,255,.04); --card2:rgba(10,14,30,.55);
-      --ok:#26d07c; --warn:#ffcc00; --bad:#ff5a5f; --accent:#6ea8ff;
-      --shadow: 0 18px 40px rgba(0,0,0,.35);
-      --r:18px;
-      --focus: 0 0 0 3px rgba(110,168,255,.18);
+      --bg:#070A14;
+      --bg2:#0B1022;
+      --line:rgba(255,255,255,.08);
+      --muted:rgba(255,255,255,.65);
+      --text:rgba(255,255,255,.92);
+      --accent:#3DDCFF;
+      --accent2:#6C5CE7;
+      --good:#2ECC71;
+      --bad:#FF4D6D;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius:18px;
+      --radius2:26px;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       background:
-        radial-gradient(1200px 600px at 15% -10%, rgba(110,168,255,.28), transparent 55%),
-        radial-gradient(900px 500px at 90% 10%, rgba(38,208,124,.20), transparent 55%),
-        radial-gradient(700px 600px at 60% 110%, rgba(255,204,0,.08), transparent 55%),
-        var(--bg);
+        radial-gradient(1200px 600px at 20% -10%, rgba(61,220,255,.14), transparent 55%),
+        radial-gradient(900px 520px at 85% 8%, rgba(108,92,231,.16), transparent 58%),
+        radial-gradient(900px 520px at 40% 110%, rgba(61,220,255,.10), transparent 58%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
       color:var(--text);
+      overflow-x:hidden;
     }
-    header{
-      position:sticky; top:0; z-index:10;
-      background: rgba(6,10,24,.82); backdrop-filter: blur(10px);
-      border-bottom:1px solid rgba(255,255,255,.08);
-    }
-    .wrap{max-width:1320px; margin:0 auto; padding:14px 16px}
-    .top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
-    .brand{display:flex; align-items:center; gap:12px}
-    .brand h1{margin:0; font-size:22px; letter-spacing:.3px; text-transform:lowercase}
-    .tag{display:block; margin-top:2px; font-size:12px; color:var(--muted)}
-    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03); font-size:12px; color:var(--muted)}
-    .pill b{color:var(--text)}
-    select, input, textarea, button{font:inherit}
-    main{max-width:1320px; margin:0 auto; padding:16px}
-    .tabs{display:flex; flex-wrap:wrap; gap:8px}
-    .tab{padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.03); cursor:pointer; font-weight:900; color:var(--muted)}
-    .tab.active{background: rgba(110,168,255,.18); border-color: rgba(110,168,255,.45); color:var(--text)}
-    .grid{display:grid; gap:12px; grid-template-columns:1fr 1fr}
-    @media (max-width:1100px){.grid{grid-template-columns:1fr}}
-    .card{
-      border-radius:var(--r); border:1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      padding:14px; box-shadow: var(--shadow);
-    }
-    .card h2{margin:0 0 10px; font-size:14px; color:#dfe6ff}
-    .subhead{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
-    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
-    input, textarea, select{
-      width:100%; border-radius:14px; border:1px solid var(--line); background: var(--card2); color:var(--text);
-      padding:10px 12px; outline:none;
-    }
-    input:focus, textarea:focus, select:focus{box-shadow: var(--focus); border-color: rgba(110,168,255,.40)}
-    textarea{min-height:92px; resize:vertical; line-height:1.35}
-    .row{display:grid; gap:10px; grid-template-columns:1fr 1fr}
-    @media (max-width:720px){.row{grid-template-columns:1fr}}
-    .row3{display:grid; gap:10px; grid-template-columns:1fr 1fr 1fr}
-    @media (max-width:980px){.row3{grid-template-columns:1fr}}
-    .btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
-    button{
-      border:0; border-radius:14px; padding:10px 12px; cursor:pointer; font-weight:900;
-      background: rgba(110,168,255,.18); color:var(--text); border:1px solid rgba(110,168,255,.35)
-    }
-    button.primary{
-      background: linear-gradient(135deg, rgba(110,168,255,.95), rgba(38,208,124,.55));
-      border-color: rgba(110,168,255,.55); color:#071022;
-    }
-    button.ghost{background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.12)}
-    button.danger{background: rgba(255,90,95,.12); border-color: rgba(255,90,95,.30)}
-    button:disabled{opacity:.55; cursor:not-allowed}
-    .muted{color:var(--muted); font-size:12px; line-height:1.45}
-    .hr{height:1px; background: rgba(255,255,255,.08); margin:12px 0}
-    .list{border:1px solid var(--line); background: rgba(10,14,30,.35); border-radius:var(--r); padding:12px}
-    .list h3{margin:0 0 8px; font-size:13px; color:#dfe6ff}
-    .table{width:100%; border-collapse:collapse; font-size:12px; overflow:hidden; border-radius:14px; border:1px solid var(--line)}
-    .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08); padding:10px; text-align:left; vertical-align:top}
-    .table th{color:#cfe0ff; background: rgba(255,255,255,.03)}
-    .table tr:last-child td{border-bottom:0}
-    .pill2{display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.15);
-      background: rgba(255,255,255,.04); font-size:11px; white-space:nowrap}
-    .pill2.ok{border-color:rgba(38,208,124,.55)}
-    .pill2.warn{border-color:rgba(255,204,0,.55)}
-    .pill2.bad{border-color:rgba(255,90,95,.55)}
-    .hl{background: rgba(255,204,0,.22); padding:0 2px; border-radius:4px}
-    .board{display:grid; gap:10px; grid-template-columns:repeat(6, 1fr)}
-    @media (max-width:1200px){.board{grid-template-columns:repeat(3, 1fr)}}
-    @media (max-width:720px){.board{grid-template-columns:1fr}}
-    .col{border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.02);
-      border-radius:var(--r); padding:10px; min-height:240px}
-    .col h4{margin:0 0 8px; font-size:12px; color:#dfe6ff}
-    .candCard{
-      border:1px solid rgba(255,255,255,.12); background: rgba(10,14,30,.35);
-      border-radius:14px; padding:10px; margin-top:8px; cursor:grab
-    }
-    .candCard b{display:block; font-size:12px}
-    .candMeta{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
-    .score{font-weight:1000}
-    .qaGrid{display:grid; gap:10px}
-    .qaCard{border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.02); border-radius:14px; padding:10px}
-    .qaTop{display:flex; justify-content:space-between; gap:10px; align-items:center}
-    .tiny{font-size:11px; color:var(--muted)}
-    .footer{max-width:1320px; margin:0 auto; padding:0 16px 20px; color:var(--muted); font-size:11px}
-
-    /* help banner */
-    .banner{
-      margin-top:12px;
-      border:1px solid rgba(110,168,255,.30);
-      background: linear-gradient(135deg, rgba(110,168,255,.16), rgba(38,208,124,.08));
-      border-radius:16px;
-      padding:10px 12px;
-      display:flex; gap:10px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;
-    }
-    .banner b{display:block}
-    .banner .actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-    .kbd{font-size:11px; padding:3px 7px; border:1px solid rgba(255,255,255,.14); border-radius:10px; background:rgba(255,255,255,.03); color:var(--muted)}
-
-    /* modal */
-    .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:16px; z-index:50}
-    .modal{
-      width:min(960px, 100%); border-radius:22px; border:1px solid rgba(255,255,255,.14);
-      background: rgba(6,10,24,.92); backdrop-filter: blur(10px); box-shadow: var(--shadow);
-      padding:16px;
-    }
-    .modal h2{margin:0 0 6px; font-size:16px}
-    .modal .grid2{display:grid; grid-template-columns:1.15fr .85fr; gap:12px}
-    @media (max-width:900px){.modal .grid2{grid-template-columns:1fr}}
-    .step{border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03); border-radius:16px; padding:12px}
-    .step b{display:block; margin-bottom:6px}
-    .closeX{float:right; cursor:pointer; padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); color:var(--text); font-weight:900}
-
-    /* toast */
-    .toast{
-      position:fixed; right:16px; bottom:16px; z-index:60;
-      padding:10px 12px; border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(6,10,24,.92); backdrop-filter: blur(10px);
+    .wrap{max-width:1220px;margin:28px auto;padding:0 18px 60px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      padding:16px 16px;border:1px solid var(--line);border-radius:24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
       box-shadow: var(--shadow);
-      display:none; max-width:min(520px, calc(100% - 32px));
-      font-size:12px; color:var(--muted);
+      position:sticky;top:12px;z-index:10;
+      backdrop-filter: blur(10px);
     }
-    .toast b{color:var(--text)}
-    .spinner{display:inline-block; width:14px; height:14px; border-radius:50%;
-      border:2px solid rgba(255,255,255,.22); border-top-color: rgba(110,168,255,.95);
-      animation: spin .9s linear infinite; vertical-align:-2px; margin-right:8px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* search */
-    .searchRow{display:grid; grid-template-columns:1fr 220px; gap:10px}
-    @media (max-width:900px){.searchRow{grid-template-columns:1fr}}
+    .brand{display:flex;align-items:center;gap:12px;min-width:240px}
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, rgba(61,220,255,.9), rgba(108,92,231,.75));
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      font-weight:800;letter-spacing:.5px;
+    }
+    .brand h1{font-size:18px;margin:0;line-height:1.15}
+    .brand p{margin:2px 0 0 0;font-size:12px;color:var(--muted)}
+    .chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .chip{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      font-size:12px;color:var(--muted);
+    }
+    .chip b{color:var(--text);font-weight:600}
+    .btn{
+      cursor:pointer;border:none;
+      padding:10px 14px;border-radius:14px;
+      background: rgba(255,255,255,.05);
+      color:var(--text);font-weight:600;
+      border:1px solid rgba(255,255,255,.10);
+      transition:.18s transform, .18s background;
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-1px);background: rgba(255,255,255,.07)}
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(61,220,255,.28), rgba(108,92,231,.26));
+      border:1px solid rgba(61,220,255,.35);
+    }
+    .btn.danger{
+      background: rgba(255,77,109,.09);
+      border:1px solid rgba(255,77,109,.25);
+      color:#ffd3db;
+    }
+    .grid{display:grid;grid-template-columns: 1.08fr .92fr;gap:18px;margin-top:18px}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} .brand{min-width:auto}}
+    .panel{
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel .hd{
+      padding:16px 18px;border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .panel .hd h2{margin:0;font-size:15px}
+    .panel .hd .sub{font-size:12px;color:var(--muted)}
+    .panel .bd{padding:16px 18px}
+    .tabs{
+      display:flex;gap:10px;flex-wrap:wrap;
+      padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);
+      border-bottom:1px solid var(--line);
+      background: rgba(0,0,0,.16);
+    }
+    .tab{
+      padding:10px 12px;border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      font-weight:700;font-size:13px;color:var(--muted);
+      cursor:pointer;
+    }
+    .tab.active{color:var(--text);border-color:rgba(61,220,255,.35);background: rgba(61,220,255,.08)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width: 760px){ .row{grid-template-columns:1fr} }
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
+    input[type="text"], input[type="url"], textarea, select{
+      width:100%;padding:12px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(7,10,20,.55);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{min-height:110px;resize:vertical;line-height:1.45}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px}
+    .divider{height:1px;background: var(--line);margin:14px 0}
+    .fileRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .fileLabel{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:14px;
+      border:1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;font-weight:700;font-size:13px;
+    }
+    .fileLabel input{display:none}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.02);
+      color: var(--muted);font-size:12px;
+    }
+    .pill .dot{width:8px;height:8px;border-radius:99px;background: var(--accent)}
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .item{
+      border:1px solid rgba(255,255,255,.09);
+      background: rgba(0,0,0,.16);
+      border-radius: 18px;
+      padding:12px 12px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .item .left{display:flex;flex-direction:column;gap:6px}
+    .item .title{font-weight:800;letter-spacing:.2px}
+    .item .meta{font-size:12px;color:var(--muted)}
+    .badge{
+      padding:7px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      font-size:12px;font-weight:800;
+      display:inline-flex;align-items:center;gap:8px;
+      white-space:nowrap;
+    }
+    .badge.good{border-color: rgba(46,204,113,.35); background: rgba(46,204,113,.10); color:#d7ffe9;}
+    .badge.bad{border-color: rgba(255,77,109,.35); background: rgba(255,77,109,.10); color:#ffd3db;}
+    .score{
+      width:44px;height:44px;border-radius:14px;
+      display:grid;place-items:center;
+      border:1px solid rgba(61,220,255,.25);
+      background: rgba(61,220,255,.08);
+      font-weight:900;
+    }
+    .searchRow{display:flex;gap:10px;align-items:center}
+    .searchRow input{flex:1}
+    table{width:100%;border-collapse:separate;border-spacing:0 10px;margin-top:10px}
+    th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
+    td{
+      padding:12px 10px;
+      border-top:1px solid rgba(255,255,255,.08);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.14);
+      vertical-align:top;
+      font-size:13px;
+    }
+    td:first-child{border-left:1px solid rgba(255,255,255,.08);border-top-left-radius:14px;border-bottom-left-radius:14px}
+    td:last-child{border-right:1px solid rgba(255,255,255,.08);border-top-right-radius:14px;border-bottom-right-radius:14px}
+    .x{display:inline-block;width:10px;height:10px;border-radius:999px;background: var(--bad)}
+    .v{display:inline-block;width:10px;height:10px;border-radius:999px;background: var(--good)}
+    .mini{font-size:12px;color:var(--muted)}
+    .toast{
+      position:fixed;right:18px;bottom:18px;
+      background: rgba(0,0,0,.70);
+      border:1px solid rgba(255,255,255,.12);
+      padding:12px 14px;border-radius:16px;
+      box-shadow: var(--shadow);
+      max-width:min(520px, calc(100vw - 36px));
+      display:none;
+      z-index:50;
+    }
+    .toast.show{display:block}
+    .toast b{display:block;margin-bottom:4px}
+    .progress{
+      height:10px;border-radius:999px;overflow:hidden;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .progress > div{height:100%;width:0;background: linear-gradient(90deg, rgba(61,220,255,.9), rgba(108,92,231,.85));}
+    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; padding:3px 8px; border:1px solid rgba(255,255,255,.16); border-bottom-color:rgba(255,255,255,.08); border-radius:10px; background: rgba(255,255,255,.04); color: var(--muted);}
+    .footerNote{margin-top:14px;color:var(--muted);font-size:12px}
   </style>
 </head>
+
 <body>
-
-<header>
   <div class="wrap">
-    <div class="top">
+    <div class="topbar">
       <div class="brand">
-        <!-- shen-gen avatar (SVG) -->
-        <svg width="46" height="46" viewBox="0 0 100 100" aria-label="shen-gen avatar" role="img"
-             style="filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); border-radius:18px">
-          <defs>
-            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="rgba(110,168,255,1)"/>
-              <stop offset="1" stop-color="rgba(38,208,124,1)"/>
-            </linearGradient>
-            <radialGradient id="g2" cx="40%" cy="30%" r="70%">
-              <stop offset="0" stop-color="rgba(255,255,255,.20)"/>
-              <stop offset="1" stop-color="rgba(255,255,255,0)"/>
-            </radialGradient>
-          </defs>
-          <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#g1)"/>
-          <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#g2)"/>
-          <circle cx="50" cy="50" r="38" fill="rgba(6,10,24,.35)" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
-          <path d="M33 60c4 9 13 14 24 14 10 0 19-4 23-11 5-9-3-16-15-18l-7-1c-7-1-10-4-9-8 1-5 7-8 14-8 6 0 12 2 16 6"
-                fill="none" stroke="rgba(255,255,255,.92)" stroke-width="6" stroke-linecap="round"/>
-          <text x="50" y="57" text-anchor="middle" font-size="26" font-weight="900" fill="rgba(255,255,255,.95)" style="letter-spacing:.5px">SG</text>
-        </svg>
-
+        <div class="logo">AI</div>
         <div>
-          <h1>shen-gen</h1>
-          <span class="tag" id="tagline">Mini ATS • Kanıtlı Ön Eleme • Aday Havuzu • Pipeline • Karşılaştır • TR/EN</span>
+          <h1>AdayIQ Pro</h1>
+          <p>Mini ATS • Kanıtlı Ön Eleme • Aday Havuzu • Karşılaştır • TR/EN</p>
         </div>
       </div>
 
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-        <span class="pill"><span id="modeLbl">Tarama</span>: <b id="modeVal">Kural Tabanlı</b></span>
-        <span class="pill"><span id="outLbl">Güven</span>: <b id="outVal">Kanıt Zorunlu</b></span>
-
-        <button class="ghost" id="openGuide">❓ <span id="helpBtnTxt">Nasıl Kullanılır</span></button>
-        <select id="lang" style="max-width:170px">
-          <option value="tr">Türkçe</option>
-          <option value="en">English</option>
-        </select>
+      <div class="chips">
+        <div class="chip">Tarama: <b>Kural Tabanlı</b></div>
+        <div class="chip">Güven: <b>Kanıt Zorunlu</b></div>
+        <button class="btn" id="btnHelp">Nasıl Kullanılır</button>
+        <button class="btn primary" id="btnExport">Excel'e Aktar (CSV)</button>
       </div>
     </div>
 
-    <div class="banner" id="banner">
-      <div>
-        <b id="bannerTitle">Hızlı Başlangıç</b>
-        <div class="muted" id="bannerText">
-          1) Pozisyon oluştur → 2) CV yükle / aday ekle → 3) “Eşleştir & Sırala” ile skor + kanıt gör → 4) Kısa liste + compare + Excel export.
-        </div>
-      </div>
-      <div class="actions">
-        <span class="kbd">Jobs</span><span class="kbd">Candidates</span><span class="kbd">Match</span><span class="kbd">Export</span>
-        <button class="ghost" id="hideBanner">✕ <span id="hideBannerTxt">Gizle</span></button>
-      </div>
-    </div>
-
-    <div class="tabs" style="margin-top:12px">
-      <div class="tab active" data-tab="jobs" id="tabJobs">Pozisyonlar</div>
-      <div class="tab" data-tab="candidates" id="tabCand">Adaylar</div>
-      <div class="tab" data-tab="match" id="tabMatch">Eşleştir & Sırala</div>
-      <div class="tab" data-tab="pipeline" id="tabPipe">Aday Süreci</div>
-      <div class="tab" data-tab="compare" id="tabCompare">Karşılaştır</div>
-      <div class="tab" data-tab="audit" id="tabAudit">Denetim Kaydı</div>
-    </div>
-  </div>
-</header>
-
-<main>
-  <!-- JOBS -->
-  <section class="page" id="page-jobs">
-    <div class="grid">
-      <div class="card">
-        <div class="subhead">
-          <h2 id="jobCreateTitle">Pozisyon Oluştur</h2>
-          <span class="pill2 warn" id="presetBadge">Preset Pack</span>
-        </div>
-
-        <div class="muted" id="jobIntro">
-          Rol şablonu seçerek enterprise ATS preset’lerini kullanabilir veya alanları manuel doldurabilirsin.
-        </div>
-
-        <div class="searchRow" style="margin-top:10px">
-          <div>
-            <label id="roleTplLbl">Rol Şablonu</label>
-            <select id="roleTpl"></select>
-            <div class="tiny" id="roleTplHint">Seçince alanlar otomatik dolar.</div>
-          </div>
-          <div>
-            <label id="roleSearchLbl">Şablon Ara</label>
-            <input id="roleSearch" placeholder="Örn: Backend, PO, Data, Finans..."/>
-            <div class="tiny" id="roleSearchHint">Arama, preset pack içindeki roller içinde çalışır.</div>
-          </div>
-        </div>
-
-        <label id="jobTitleLbl">Pozisyon Adı</label>
-        <input id="jobTitle"/>
-
-        <div class="row">
-          <div>
-            <label id="jobGroupLbl">Pozisyon Grubu</label>
-            <select id="jobGroup">
-              <option value="auto" id="grpAuto">Otomatik</option>
-              <option value="tech">Teknoloji</option>
-              <option value="product">Ürün / BA / PO</option>
-              <option value="data">Veri</option>
-              <option value="finance">Finans</option>
-              <option value="sales">Satış</option>
-              <option value="ops">Operasyon</option>
-              <option value="hr">İK</option>
-              <option value="legal">Hukuk & Uyum</option>
-            </select>
-          </div>
-          <div>
-            <label id="jobLocLbl">Lokasyon (opsiyonel)</label>
-            <input id="jobLoc"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label id="mustLbl">Olmazsa Olmazlar (virgülle)</label>
-            <input id="jobMust"/>
-            <div class="tiny" id="mustHint">Örn: SQL, API, Agile, BPMN</div>
-          </div>
-          <div>
-            <label id="niceLbl">Artı Değerler (virgülle)</label>
-            <input id="jobNice"/>
-            <div class="tiny" id="niceHint">Örn: Jira, Confluence, Postman</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label id="redLbl">Kırmızı Bayraklar (virgülle)</label>
-            <input id="jobRed"/>
-            <div class="tiny" id="redHint">Örn: sahte, intihal</div>
-          </div>
-          <div>
-            <label id="minYearsLbl">Minimum Deneyim (yıl)</label>
-            <input id="jobMinYears" type="number" min="0" step="1"/>
-          </div>
-        </div>
-
-        <label id="qSetLbl">Soru Seti (her satıra 1 soru)</label>
-        <textarea id="jobQs"></textarea>
-        <div class="tiny" id="qHint">Sistem her soruya “Kanıtlı / Muhtemel / Bulunamadı” üretir (kanıt snippet’iyle).</div>
-
-        <div class="btns">
-          <button class="primary" id="saveJob">Pozisyonu Kaydet</button>
-          <button class="ghost" id="jobTemplate">Örnek Şablon</button>
-          <button class="ghost" id="resetJob">Temizle</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 id="jobListTitle">Pozisyonlar</h2>
-        <div class="list">
-          <h3 id="jobSelectLbl">Pozisyon Seç</h3>
-          <select id="jobSelect"></select>
-          <div class="btns">
-            <button class="danger" id="deleteJob">Sil</button>
-            <button class="ghost" id="cloneJob">Kopyala</button>
-            <button class="ghost" id="exportJobDef">Pozisyonu Excel’e Aktar</button>
-          </div>
-          <div class="hr"></div>
-          <div class="muted" id="jobDetail">—</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CANDIDATES -->
-  <section class="page" id="page-candidates" style="display:none">
-    <div class="grid">
-      <div class="card">
-        <h2 id="candCreateTitle">Aday Ekle</h2>
-        <div class="muted" id="candIntro">
-          CV’yi doküman (PDF/DOCX/TXT) olarak yükleyebilirsin. Sistem metne çevirip kanıtlı tarama yapar.
-        </div>
-
-        <label id="candNameLbl">Ad Soyad</label>
-        <input id="candName"/>
-
-        <div class="row">
-          <div>
-            <label id="candSourceLbl">Kaynak</label>
-            <input id="candSource"/>
-          </div>
-          <div>
-            <label id="candTagsLbl">Etiketler (virgülle)</label>
-            <input id="candTags"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label id="cvFileLbl">CV Dosyası Yükle (PDF/DOCX/TXT)</label>
-            <input id="cvFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"/>
-            <div class="tiny" id="cvFileHint">Dosya yüklendiğinde otomatik okunur ve “CV Metni” alanına işlenir.</div>
-          </div>
-          <div>
-            <label id="liFileLbl">LinkedIn / Ek Doküman (opsiyonel: PDF/DOCX/TXT)</label>
-            <input id="liFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"/>
-            <div class="tiny" id="liFileHint">LinkedIn URL’den otomatik çekme yok; metin/doküman ile çalışır (CORS/izin kısıtları).</div>
-          </div>
-        </div>
-
-        <label id="cvTextLbl">CV Metni</label>
-        <textarea id="candCV"></textarea>
-
-        <label id="liTextLbl">LinkedIn Metni (opsiyonel)</label>
-        <textarea id="candLI"></textarea>
-
-        <div class="btns">
-          <button class="primary" id="saveCand">Adayı Kaydet</button>
-          <button class="ghost" id="resetCand">Temizle</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="subhead">
-          <h2 id="candListTitle">Adaylar</h2>
-          <span class="pill2" id="candCount">0</span>
-        </div>
-
-        <div class="list">
-          <h3 id="candSelectLbl">Aday Seç</h3>
-
-          <div class="searchRow">
-            <input id="candSearch" placeholder="Aday ara (ad, etiket, kaynak)"/>
-            <select id="candFilter">
-              <option value="all">Tümü</option>
-              <option value="hasCv">CV var</option>
-              <option value="hasLi">LinkedIn var</option>
-            </select>
-          </div>
-
-          <select id="candSelect" style="margin-top:10px"></select>
-
-          <div class="btns">
-            <button class="danger" id="deleteCand">Sil</button>
-            <button class="ghost" id="exportCandidates">Adayları Excel’e Aktar</button>
-          </div>
-          <div class="hr"></div>
-          <div class="muted" id="candDetail">—</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- MATCH -->
-  <section class="page" id="page-match" style="display:none">
-    <div class="grid">
-      <div class="card">
-        <div class="subhead">
-          <h2 id="matchTitle">Eşleştir & Sırala</h2>
-          <span class="pill2 ok" id="evidenceRule">Evidence-required</span>
-        </div>
-
-        <div class="muted" id="matchIntro">
-          Bu ekran “net çıktı” ekranıdır: skor + kanıt + soru-cevap aynı yerde.
-        </div>
-
-        <div class="row">
-          <div>
-            <label id="matchJobLbl">Pozisyon</label>
-            <select id="matchJob"></select>
-          </div>
-          <div>
-            <label id="matchWeightsLbl">Ağırlıklar</label>
-            <div class="row">
-              <input id="wMust" type="number" min="1" step="1" value="12" title="Must weight"/>
-              <input id="wNice" type="number" min="1" step="1" value="5" title="Nice weight"/>
-            </div>
-            <div class="row">
-              <input id="wYears" type="number" min="0" step="1" value="8" title="Years weight"/>
-              <input id="wRed" type="number" min="0" step="1" value="10" title="Red penalty"/>
-            </div>
-            <div class="tiny" id="weightHint">İpucu: Must ağırlığı ↑ = daha katı filtreleme.</div>
-          </div>
-        </div>
-
-        <div class="btns">
-          <button class="primary" id="runMatch">Eşleştirmeyi Çalıştır</button>
-          <button class="ghost" id="pushShortlist">Top 3 → Kısa Liste</button>
-          <button class="ghost" id="exportShortlist">Excel’e Aktar (CSV)</button>
-          <button class="ghost" id="exportAllRank">Tüm Skorları Excel’e Aktar</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="list">
-          <div class="subhead">
-            <h3 id="rankLbl">Sıralama</h3>
-            <span class="pill2" id="rankCount">0</span>
-          </div>
-
-          <div class="searchRow">
-            <input id="rankSearch" placeholder="Sıralamada ara (aday adı/etiket)"/>
-            <select id="rankFilter">
-              <option value="all">Tümü</option>
-              <option value="fit">Uygun</option>
-              <option value="review">İncele</option>
-              <option value="weak">Uygun Değil</option>
-            </select>
-          </div>
-
-          <div class="muted" id="rankEmpty" style="margin-top:10px">
-            Henüz skor yok. “Eşleştirmeyi Çalıştır” butonuna bas.
-          </div>
-          <div id="ranking" style="margin-top:10px"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 id="matchDetailTitle">Kanıtlar ve Soru-Cevap</h2>
-        <div class="list">
-          <h3 id="pickAppLbl">Sıralamadan Aday Seç</h3>
-          <select id="appSelect"></select>
-
-          <div class="hr"></div>
-          <div id="scoreBadge" class="muted">—</div>
-
-          <div class="hr"></div>
-          <h3 id="qaLbl">Soru-Cevap (Kanıtlı)</h3>
-          <div id="qaHost" class="qaGrid"></div>
-
-          <div class="hr"></div>
-          <h3 id="eviLbl">Skor Kartı Kanıtları</h3>
-          <table class="table" id="eviTable">
-            <thead><tr><th>Kriter</th><th>Durum</th><th>Kanıt</th></tr></thead>
-            <tbody><tr><td colspan="3" class="muted">—</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PIPELINE -->
-  <section class="page" id="page-pipeline" style="display:none">
-    <div class="card">
-      <h2 id="pipeTitle">Aday Süreci</h2>
-      <div class="row">
+    <div class="panel" style="margin-top:16px">
+      <div class="hd">
         <div>
-          <label id="pipeJobLbl">Pozisyon</label>
-          <select id="pipeJob"></select>
+          <h2>Hızlı Başlangıç</h2>
+          <div class="sub">1) Pozisyonu tanımla → 2) CV/LinkedIn ekle → 3) “Eşleştir & Sırala” ile skor + kanıt gör → 4) Kısa liste + karşılaştır → 5) CSV indir</div>
         </div>
-        <div>
-          <label id="pipeHintLbl">İpucu</label>
-          <div class="muted" id="pipeHint">Adayları aşamalar arasında sürükle-bırak yap. Tüm hareketler kayıt altındadır.</div>
-        </div>
+        <div class="pill"><span class="dot"></span> Tamamen local (tarayıcı içinde). Veri dışarı çıkmaz.</div>
       </div>
-      <div class="hr"></div>
-      <div class="board" id="board"></div>
-    </div>
-  </section>
 
-  <!-- COMPARE -->
-  <section class="page" id="page-compare" style="display:none">
-    <div class="grid">
-      <div class="card">
-        <h2 id="compareTitle">Karşılaştır</h2>
-        <div class="muted" id="compareIntro">
-          Kaydedilmiş adayları karşılaştırabilir veya iki yeni CV dosyası yükleyerek “Hızlı Compare” yapabilirsin.
-        </div>
+      <div class="tabs" role="tablist">
+        <div class="tab active" data-tab="tab-jobs">Pozisyonlar</div>
+        <div class="tab" data-tab="tab-candidates">Adaylar</div>
+        <div class="tab" data-tab="tab-match">Eşleştir & Sırala</div>
+        <div class="tab" data-tab="tab-compare">Karşılaştır</div>
+        <div class="tab" data-tab="tab-audit">Denetim Kaydı</div>
+      </div>
 
-        <label id="cmpJobLbl">Pozisyon</label>
-        <select id="cmpJob"></select>
-
-        <div class="row">
-          <div>
-            <label id="cmpALbl">Aday A</label>
-            <select id="cmpA"></select>
-          </div>
-          <div>
-            <label id="cmpBLbl">Aday B</label>
-            <select id="cmpB"></select>
-          </div>
-        </div>
-
-        <div class="btns">
-          <button class="primary" id="runCompare">Karşılaştır</button>
-          <button class="ghost" id="exportCompare">Compare Sonucunu Excel’e Aktar</button>
-        </div>
-
-        <div class="hr"></div>
-        <div class="list">
-          <h3 id="cmpOutLbl">Sonuç</h3>
-          <div id="cmpOut" class="muted">—</div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="list">
-          <h3 id="quickCmpTitle">Hızlı Compare (Dosya ile)</h3>
+      <div class="bd">
+        <!-- JOBS -->
+        <section id="tab-jobs">
           <div class="row">
             <div>
-              <label id="qcAFileLbl">A Dosyası (PDF/DOCX/TXT)</label>
-              <input id="qcAFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"/>
-              <div class="tiny" id="qcAHint">Dosya okunup geçici aday A oluşturulur.</div>
+              <label>Pozisyon Başlığı</label>
+              <input type="text" id="jobTitle" placeholder="Örn: Kıdemli İş Analisti / Product Owner" />
             </div>
             <div>
-              <label id="qcBFileLbl">B Dosyası (PDF/DOCX/TXT)</label>
-              <input id="qcBFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"/>
-              <div class="tiny" id="qcBHint">Dosya okunup geçici aday B oluşturulur.</div>
+              <label>Arama Dili</label>
+              <select id="langMode">
+                <option value="tr" selected>Türkçe (TR)</option>
+                <option value="en">English (EN)</option>
+                <option value="mix">TR + EN (Karışık)</option>
+              </select>
             </div>
           </div>
-          <div class="btns">
-            <button class="primary" id="runQuickCompare" disabled>Hızlı Compare Çalıştır</button>
+
+          <div class="row">
+            <div>
+              <label>Must Kriterleri (Her satıra 1)</label>
+              <textarea id="mustList" placeholder="Örn:
+business analysis
+user story
+acceptance criteria
+bpmn
+api"></textarea>
+              <div class="hint">TR/EN eş anlamlı eşleştirme açık (ör. “business analysis” ⇄ “iş analizi”).</div>
+            </div>
+            <div>
+              <label>Nice-to-have (Her satıra 1)</label>
+              <textarea id="niceList" placeholder="Örn:
+uml
+jira
+confluence
+fintech
+sql"></textarea>
+              <div class="hint">Nice kriterler skoru artırır ama “Uygun” kararını tek başına değiştirmez.</div>
+            </div>
           </div>
-          <div class="hr"></div>
-          <div class="muted" id="qcStatus">—</div>
-        </div>
-      </div>
 
-      <div class="card">
-        <h2 id="cmpQaTitle">Kanıtlı Soru-Cevap (Yan Yana)</h2>
-        <div class="row">
-          <div class="list">
-            <h3 id="cmpQaA">A</h3>
-            <div id="cmpQaHostA" class="qaGrid"></div>
+          <div class="divider"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn primary" id="btnSaveJob">Pozisyonu Kaydet</button>
+            <button class="btn" id="btnLoadDemo">Demo Pozisyon Yükle</button>
+            <span class="mini">Kısayol: <span class="kbd">Ctrl</span> + <span class="kbd">S</span></span>
           </div>
-          <div class="list">
-            <h3 id="cmpQaB">B</h3>
-            <div id="cmpQaHostB" class="qaGrid"></div>
+          <div class="footerNote">İpucu: MUST listeni çok katı tutarsan “analist” CV’leri bile elenebilir. Bu yüzden eş anlamlı + kanıtlı tarama kullanıyoruz.</div>
+        </section>
+
+        <!-- CANDIDATES -->
+        <section id="tab-candidates" style="display:none">
+          <div class="grid">
+            <div class="panel" style="box-shadow:none">
+              <div class="hd">
+                <div>
+                  <h2>Aday Ekle</h2>
+                  <div class="sub">LinkedIn URL’den ad-soyad otomatik tahmin edilir. Dosya yükleyince metin çıkarılır.</div>
+                </div>
+                <div class="pill"><span class="dot"></span> OCR yok (görsel PDF desteklenmez)</div>
+              </div>
+              <div class="bd">
+                <label>Ad Soyad</label>
+                <input type="text" id="candName" placeholder="Aday adı soyadı" />
+
+                <div class="row">
+                  <div>
+                    <label>Kaynak (LinkedIn / Referans / Site)</label>
+                    <input type="url" id="candSource" placeholder="Örn: https://www.linkedin.com/in/serdar-torun/" />
+                    <div class="hint">URL girip alan dışına tıklayınca ad-soyad otomatik doldurulur.</div>
+                  </div>
+                  <div>
+                    <label>Etiketler (virgülle)</label>
+                    <input type="text" id="candTags" placeholder="Örn: Senior, Remote, FinTech" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label>CV Dosyası Yükle (PDF/DOCX/TXT)</label>
+                    <div class="fileRow">
+                      <label class="fileLabel">
+                        Dosya Seç
+                        <input type="file" id="cvFile" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" />
+                      </label>
+                      <span class="pill" id="cvFileInfo"><span class="dot"></span> Dosya seçilmedi</span>
+                    </div>
+                    <div class="hint">Dosya seçildikten sonra metin çıkarılır ve “CV Metni” alanına yazılır.</div>
+                  </div>
+
+                  <div>
+                    <label>LinkedIn / Ek Doküman (opsiyonel)</label>
+                    <div class="fileRow">
+                      <label class="fileLabel">
+                        Dosya Seç
+                        <input type="file" id="lnFile" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" />
+                      </label>
+                      <span class="pill" id="lnFileInfo"><span class="dot"></span> Dosya seçilmedi</span>
+                    </div>
+                    <div class="hint">LinkedIn URL’den otomatik çekme yok; metin/doküman ile çalışır.</div>
+                  </div>
+                </div>
+
+                <label>CV Metni</label>
+                <textarea id="cvText" placeholder="CV metnini buraya yapıştırabilir veya dosya yükleyebilirsin..."></textarea>
+
+                <label>LinkedIn Metni (opsiyonel)</label>
+                <textarea id="lnText" placeholder="LinkedIn profil metnini buraya yapıştırabilirsin..."></textarea>
+
+                <div class="divider"></div>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                  <button class="btn primary" id="btnAddCandidate">Adayı Kaydet</button>
+                  <button class="btn" id="btnClearForm">Formu Temizle</button>
+                </div>
+
+                <div style="margin-top:12px">
+                  <div class="progress"><div id="progBar"></div></div>
+                  <div class="hint" id="progText" style="margin-top:8px">Hazır.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" style="box-shadow:none">
+              <div class="hd">
+                <div>
+                  <h2>Adaylar</h2>
+                  <div class="sub">Seçili adayı düzenle / sil / export</div>
+                </div>
+                <button class="btn danger" id="btnDeleteCandidate" disabled>Sil</button>
+              </div>
+              <div class="bd">
+                <div class="searchRow">
+                  <input type="text" id="candSearch" placeholder="Aday ara (ad, etiket, kaynak)" />
+                  <button class="btn" id="btnFilterAll">Tümü</button>
+                </div>
+                <div class="list" id="candList"></div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        </section>
 
-  <!-- AUDIT -->
-  <section class="page" id="page-audit" style="display:none">
-    <div class="card">
-      <h2 id="auditTitle">Denetim Kaydı</h2>
-      <div class="muted" id="auditIntro">
-        Yapılan her kritik işlem (eşleştirme, stage değişimi, export vb.) burada kayıt altındadır.
-      </div>
-      <div class="hr"></div>
-      <div class="list">
-        <h3 id="auditListLbl">İşlemler</h3>
-        <div id="auditList" class="muted">—</div>
-      </div>
-      <div class="btns">
-        <button class="ghost" id="clearAudit">Kayıtları Temizle</button>
-        <button class="danger" id="clearAll">Tüm Veriyi Sıfırla</button>
-      </div>
-    </div>
-  </section>
-</main>
+        <!-- MATCH -->
+        <section id="tab-match" style="display:none">
+          <div class="grid">
+            <div class="panel" style="box-shadow:none">
+              <div class="hd">
+                <div>
+                  <h2>Sıralamada Ara</h2>
+                  <div class="sub">MUST kriterler + kanıt ile otomatik puanlama</div>
+                </div>
+                <button class="btn" id="btnRunMatch">Eşleştir & Sırala</button>
+              </div>
+              <div class="bd">
+                <div class="row">
+                  <div>
+                    <label>Arama</label>
+                    <input type="text" id="rankSearch" placeholder="Sıralamada ara (aday adı/etiket)" />
+                  </div>
+                  <div>
+                    <label>Filtre</label>
+                    <select id="rankFilter">
+                      <option value="all" selected>Tümü</option>
+                      <option value="fit">Uygun</option>
+                      <option value="nofit">Uygun Değil</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="list" id="rankList" style="margin-top:14px"></div>
+              </div>
+            </div>
 
-<div class="footer" id="footer">
-  shen-gen: Kanıt zorunlu, kural tabanlı mini ATS. PDF/DOCX okuma tarayıcı içinde yapılır.
-</div>
+            <div class="panel" style="box-shadow:none">
+              <div class="hd">
+                <div>
+                  <h2>Skor Kartı Kanıtları</h2>
+                  <div class="sub" id="scoreSub">Bir aday seç.</div>
+                </div>
+                <div class="pill"><span class="dot"></span> Kanıt gösterimi açık</div>
+              </div>
+              <div class="bd">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:24%">Kriter</th>
+                      <th style="width:10%">Durum</th>
+                      <th>Kanıt</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scoreTable"></tbody>
+                </table>
+                <div class="footerNote">
+                  Not: Uygun çıkmıyorsa genelde (1) CV metni boş gelmiştir (PDF görsel olabilir) veya (2) kriter TR/EN uyumsuzdur. Bu sürümde TR/EN eş anlamlılar eklendi.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-<!-- Guide modal -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <button class="closeX" id="closeGuide">✕</button>
-    <h2 id="guideTitle">shen-gen Nasıl Kullanılır?</h2>
-    <div class="muted" id="guideSubtitle">3 dakikada net çıktı alacağın kurumsal akış</div>
-    <div class="hr"></div>
+        <!-- COMPARE -->
+        <section id="tab-compare" style="display:none">
+          <div class="panel" style="box-shadow:none">
+            <div class="hd">
+              <div>
+                <h2>Karşılaştır</h2>
+                <div class="sub">Aynı pozisyon için 2 adayı yan yana kıyasla</div>
+              </div>
+              <button class="btn" id="btnCompare">Karşılaştır</button>
+            </div>
+            <div class="bd">
+              <div class="row">
+                <div>
+                  <label>Aday 1</label>
+                  <select id="cmp1"></select>
+                </div>
+                <div>
+                  <label>Aday 2</label>
+                  <select id="cmp2"></select>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div id="cmpOut" class="mini">Karşılaştırma için 2 aday seç.</div>
+            </div>
+          </div>
+        </section>
 
-    <div class="grid2">
-      <div class="step">
-        <b id="g1t">1) Preset pack’ten rol seç</b>
-        <div class="muted" id="g1d">
-          Rol şablonu seçince Must/Nice/Red/Questions otomatik dolar.
-        </div>
-      </div>
-      <div class="step">
-        <b id="g2t">2) CV yükle</b>
-        <div class="muted" id="g2d">
-          PDF/DOCX/TXT yükle → metne çevrilsin → aday kaydet.
-        </div>
-      </div>
-      <div class="step">
-        <b id="g3t">3) Eşleştir & Sırala</b>
-        <div class="muted" id="g3d">
-          Skor + kanıt + soru cevap tek ekranda. Kanıt yoksa “Bulunamadı”.
-        </div>
-      </div>
-      <div class="step">
-        <b id="g4t">4) Kısa liste, pipeline, compare</b>
-        <div class="muted" id="g4d">
-          Top3’ü kısa listeye al, pipeline’da ilerlet, compare ile A/B karar ver.
-        </div>
-      </div>
-      <div class="step">
-        <b id="g5t">Excel’e aktar</b>
-        <div class="muted" id="g5d">
-          CSV export UTF-8 BOM + TR Excel için “;” ayırıcı ile tablo gibi açılır.
-        </div>
-      </div>
-      <div class="step">
-        <b id="g6t">Hızlı demo</b>
-        <div class="muted" id="g6d">
-          Demo doldur → 2 örnek aday ekle → eşleştirmeyi çalıştır.
-        </div>
-        <div class="btns">
-          <button class="primary" id="demoFill">Demo doldur</button>
-          <button class="ghost" id="goMatch">Match ekranına git</button>
-        </div>
+        <!-- AUDIT -->
+        <section id="tab-audit" style="display:none">
+          <div class="panel" style="box-shadow:none">
+            <div class="hd">
+              <div>
+                <h2>Denetim Kaydı</h2>
+                <div class="sub">Son işlemler / hatalar</div>
+              </div>
+              <button class="btn" id="btnClearAudit">Temizle</button>
+            </div>
+            <div class="bd">
+              <textarea id="auditLog" readonly style="min-height:260px"></textarea>
+              <div class="footerNote">Not: GitHub Pages’te çalışır. Veriler sadece tarayıcında (localStorage).</div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"><b id="toastTitle">Bilgi</b><div id="toastMsg"></div></div>
 
-<script>
-/* =========================
-   i18n
-========================= */
-const I18N = {
-  tr: {
-    tagline:"Mini ATS • Kanıtlı Ön Eleme • Aday Havuzu • Pipeline • Karşılaştır • TR/EN",
-    modeLbl:"Tarama", modeVal:"Kural Tabanlı",
-    outLbl:"Güven",  outVal:"Kanıt Zorunlu",
-    helpBtn:"Nasıl Kullanılır",
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const now = () => new Date().toISOString().replace('T',' ').slice(0,19);
 
-    bannerTitle:"Hızlı Başlangıç",
-    bannerText:"1) Pozisyon oluştur → 2) CV yükle / aday ekle → 3) “Eşleştir & Sırala” ile skor + kanıt gör → 4) Kısa liste + compare + Excel export.",
-    hideBanner:"Gizle",
-
-    tabs:{jobs:"Pozisyonlar", candidates:"Adaylar", match:"Eşleştir & Sırala", pipeline:"Aday Süreci", compare:"Karşılaştır", audit:"Denetim Kaydı"},
-
-    jobs:{
-      create:"Pozisyon Oluştur",
-      intro:"Rol şablonu seçerek enterprise ATS preset’lerini kullanabilir veya alanları manuel doldurabilirsin.",
-      roleTpl:"Rol Şablonu",
-      roleTplHint:"Seçince alanlar otomatik dolar.",
-      roleSearch:"Şablon Ara",
-      roleSearchHint:"Arama, preset pack içindeki roller içinde çalışır.",
-      list:"Pozisyonlar", select:"Pozisyon Seç",
-      title:"Pozisyon Adı", group:"Pozisyon Grubu", loc:"Lokasyon (opsiyonel)",
-      must:"Olmazsa Olmazlar (virgülle)", mustHint:"Örn: SQL, API, Agile, BPMN",
-      nice:"Artı Değerler (virgülle)", niceHint:"Örn: Jira, Confluence, Postman",
-      red:"Kırmızı Bayraklar (virgülle)", redHint:"Örn: sahte, intihal",
-      years:"Minimum Deneyim (yıl)",
-      qs:"Soru Seti (her satıra 1 soru)", qHint:"Sistem her soruya “Kanıtlı / Muhtemel / Bulunamadı” üretir (kanıt snippet’iyle).",
-      save:"Pozisyonu Kaydet", tpl:"Örnek Şablon", reset:"Temizle", del:"Sil", clone:"Kopyala",
-      exportDef:"Pozisyonu Excel’e Aktar"
-    },
-
-    cand:{
-      create:"Aday Ekle",
-      intro:"CV’yi doküman (PDF/DOCX/TXT) olarak yükleyebilirsin. Sistem metne çevirip kanıtlı tarama yapar.",
-      list:"Adaylar", select:"Aday Seç",
-      name:"Ad Soyad", source:"Kaynak", tags:"Etiketler (virgülle)",
-      cvFile:"CV Dosyası Yükle (PDF/DOCX/TXT)", cvFileHint:"Dosya yüklendiğinde otomatik okunur ve “CV Metni” alanına işlenir.",
-      liFile:"LinkedIn / Ek Doküman (opsiyonel: PDF/DOCX/TXT)", liFileHint:"LinkedIn URL’den otomatik çekme yok; metin/doküman ile çalışır.",
-      cv:"CV Metni", li:"LinkedIn Metni (opsiyonel)",
-      save:"Adayı Kaydet", reset:"Temizle", del:"Sil",
-      searchPH:"Aday ara (ad, etiket, kaynak)",
-      exportAll:"Adayları Excel’e Aktar"
-    },
-
-    match:{
-      title:"Eşleştir & Sırala",
-      intro:"Bu ekran “net çıktı” ekranıdır: skor + kanıt + soru-cevap aynı yerde.",
-      job:"Pozisyon", weights:"Ağırlıklar", weightHint:"İpucu: Must ağırlığı ↑ = daha katı filtreleme.",
-      run:"Eşleştirmeyi Çalıştır",
-      push:"Top 3 → Kısa Liste",
-      export:"Excel’e Aktar (CSV)",
-      exportAll:"Tüm Skorları Excel’e Aktar",
-      ranking:"Sıralama",
-      rankEmpty:"Henüz skor yok. “Eşleştirmeyi Çalıştır” butonuna bas.",
-      pick:"Sıralamadan Aday Seç",
-      detailTitle:"Kanıtlar ve Soru-Cevap",
-      qa:"Soru-Cevap (Kanıtlı)", evi:"Skor Kartı Kanıtları",
-      cols:{crit:"Kriter", status:"Durum", ev:"Kanıt"},
-      rankSearchPH:"Sıralamada ara (aday adı/etiket)"
-    },
-
-    pipe:{ title:"Aday Süreci", job:"Pozisyon", hintLbl:"İpucu",
-      hint:"Adayları aşamalar arasında sürükle-bırak yap. Tüm hareketler kayıt altındadır.",
-      stages:["Yeni","Ön Eleme","Kısa Liste","Mülakat","Teklif","Reddedildi"]
-    },
-
-    cmp:{
-      title:"Karşılaştır",
-      intro:"Kaydedilmiş adayları karşılaştırabilir veya iki yeni CV dosyası yükleyerek “Hızlı Compare” yapabilirsin.",
-      job:"Pozisyon", a:"Aday A", b:"Aday B", run:"Karşılaştır",
-      out:"Sonuç", qa:"Kanıtlı Soru-Cevap (Yan Yana)",
-      export:"Compare Sonucunu Excel’e Aktar",
-      quickTitle:"Hızlı Compare (Dosya ile)",
-      qcA:"A Dosyası (PDF/DOCX/TXT)", qcB:"B Dosyası (PDF/DOCX/TXT)",
-      qcRun:"Hızlı Compare Çalıştır"
-    },
-
-    audit:{
-      title:"Denetim Kaydı",
-      intro:"Yapılan her kritik işlem (eşleştirme, stage değişimi, export vb.) burada kayıt altındadır.",
-      list:"İşlemler", clear:"Kayıtları Temizle", resetAll:"Tüm Veriyi Sıfırla"
-    },
-
-    guide:{
-      title:"shen-gen Nasıl Kullanılır?",
-      sub:"3 dakikada net çıktı alacağın kurumsal akış",
-      s1t:"1) Preset pack’ten rol seç", s1d:"Rol şablonu seçince Must/Nice/Red/Questions otomatik dolar.",
-      s2t:"2) CV yükle", s2d:"PDF/DOCX/TXT yükle → metne çevrilsin → aday kaydet.",
-      s3t:"3) Eşleştir & Sırala", s3d:"Skor + kanıt + soru cevap tek ekranda. Kanıt yoksa “Bulunamadı”.",
-      s4t:"4) Kısa liste, pipeline, compare", s4d:"Top3’ü kısa listeye al, pipeline’da ilerlet, compare ile A/B karar ver.",
-      s5t:"Excel’e aktar", s5d:"CSV export UTF-8 BOM + TR Excel için “;” ayırıcı ile tablo gibi açılır.",
-      s6t:"Hızlı demo", s6d:"Demo doldur → 2 örnek aday ekle → eşleştirmeyi çalıştır.",
-      demo:"Demo doldur", go:"Match ekranına git"
-    },
-
-    status:{
-      fit:"Uygun",
-      review:"İncele",
-      weak:"Uygun Değil",
-      confirmed:"Kanıtlı",
-      likely:"Muhtemel",
-      notfound:"Bulunamadı"
-    },
-
-    misc:{
-      none:"—",
-      notFound:"Metinde bulunamadı (veri eksik olabilir).",
-      footer:"shen-gen: Kanıt zorunlu, kural tabanlı mini ATS. PDF/DOCX okuma tarayıcı içinde yapılır.",
-      presetPH:"— Şablon Seç —",
-      presetPack:"Preset Pack",
-      parsing:"Dosya okunuyor",
-      parsedOk:"Dosya okundu",
-      parsedErr:"Dosya okunamadı (format/izin/bozuk dosya olabilir).",
-      exportOk:"Excel çıktısı hazırlandı.",
-      needJobCand:"Önce pozisyon ve en az 1 aday olmalı.",
-      quickReady:"Hızlı compare için iki dosya da hazır.",
-      quickNotReady:"Hızlı compare için iki dosyayı da yükle."
-    },
-
-    placeholders:{
-      roleSearch:"Örn: Backend, PO, Data, Finans...",
-      jobTitle:"Örn: Kıdemli İş Analisti",
-      jobLoc:"İstanbul / Uzaktan",
-      must:"Örn: SQL, API, Agile, BPMN",
-      nice:"Örn: Jira, Confluence, Postman",
-      red:"Örn: sahte, intihal",
-      candName:"Aday adı soyadı",
-      source:"LinkedIn / Referans / Başvuru",
-      tags:"Örn: Senior, Remote, FinTech",
-      cv:"CV metnini buraya yapıştırabilir veya dosya yükleyebilirsin…",
-      li:"LinkedIn metnini buraya yapıştırabilir veya dosya yükleyebilirsin…"
+    function toast(title, msg){
+      $("#toastTitle").textContent = title;
+      $("#toastMsg").textContent = msg;
+      const t = $("#toast");
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3600);
     }
-  },
-
-  en: {
-    tagline:"Mini ATS • Evidence-required Screening • Candidate Pool • Pipeline • Compare • TR/EN",
-    modeLbl:"Screening", modeVal:"Rule-based",
-    outLbl:"Trust", outVal:"Evidence required",
-    helpBtn:"How to Use",
-
-    bannerTitle:"Quick Start",
-    bannerText:"1) Create a job → 2) Upload CV / add candidates → 3) Run “Match & Rank” for score + evidence → 4) Shortlist + compare + Excel export.",
-    hideBanner:"Hide",
-
-    tabs:{jobs:"Jobs", candidates:"Candidates", match:"Match & Rank", pipeline:"Candidate Pipeline", compare:"Compare", audit:"Audit Log"},
-
-    jobs:{
-      create:"Create Job",
-      intro:"Use enterprise preset pack or fill the fields manually.",
-      roleTpl:"Role Template",
-      roleTplHint:"Selecting auto-fills the fields.",
-      roleSearch:"Search Templates",
-      roleSearchHint:"Search works inside preset pack.",
-      list:"Jobs", select:"Select job",
-      title:"Job title", group:"Job group", loc:"Location (optional)",
-      must:"Must-have (comma)", mustHint:"e.g. SQL, API, Agile, BPMN",
-      nice:"Nice-to-have (comma)", niceHint:"e.g. Jira, Confluence, Postman",
-      red:"Red flags (comma)", redHint:"e.g. fake, plagiarism",
-      years:"Minimum experience (years)",
-      qs:"Question set (one per line)", qHint:"For each question you get “Confirmed / Likely / Not found” with an evidence snippet.",
-      save:"Save Job", tpl:"Sample Template", reset:"Clear", del:"Delete", clone:"Clone",
-      exportDef:"Export Job to Excel"
-    },
-
-    cand:{
-      create:"Create Candidate",
-      intro:"Upload CV as a document (PDF/DOCX/TXT). It’s converted to text and screened with evidence.",
-      list:"Candidates", select:"Select candidate",
-      name:"Full name", source:"Source", tags:"Tags (comma)",
-      cvFile:"Upload CV File (PDF/DOCX/TXT)", cvFileHint:"When uploaded, it’s parsed and placed into “CV Text”.",
-      liFile:"LinkedIn / Extra Doc (optional: PDF/DOCX/TXT)", liFileHint:"No direct LinkedIn URL fetch (CORS/permissions). Use text/doc.",
-      cv:"CV Text", li:"LinkedIn Text (optional)",
-      save:"Save Candidate", reset:"Clear", del:"Delete",
-      searchPH:"Search candidate (name, tag, source)",
-      exportAll:"Export Candidates to Excel"
-    },
-
-    match:{
-      title:"Match & Rank",
-      intro:"This is the clear output screen: score + evidence + Q&A together.",
-      job:"Job", weights:"Weights", weightHint:"Tip: higher Must weight = stricter filtering.",
-      run:"Run Matching",
-      push:"Top 3 → Shortlist",
-      export:"Export to Excel (CSV)",
-      exportAll:"Export All Scores",
-      ranking:"Ranking",
-      rankEmpty:"No scores yet. Click “Run Matching”.",
-      pick:"Pick candidate from ranking",
-      detailTitle:"Evidence & Q&A",
-      qa:"Q&A (Evidence-required)", evi:"Scorecard Evidence",
-      cols:{crit:"Criterion", status:"Status", ev:"Evidence"},
-      rankSearchPH:"Search ranking (name/tags)"
-    },
-
-    pipe:{ title:"Candidate Pipeline", job:"Job", hintLbl:"Hint",
-      hint:"Drag-drop candidates between stages. All changes are logged.",
-      stages:["New","Screened","Shortlist","Interview","Offer","Rejected"]
-    },
-
-    cmp:{
-      title:"Compare",
-      intro:"Compare saved candidates or upload two new CV files for “Quick Compare”.",
-      job:"Job", a:"Candidate A", b:"Candidate B", run:"Compare",
-      out:"Result", qa:"Evidence-based Q&A (Side-by-side)",
-      export:"Export Compare to Excel",
-      quickTitle:"Quick Compare (by file)",
-      qcA:"File A (PDF/DOCX/TXT)", qcB:"File B (PDF/DOCX/TXT)",
-      qcRun:"Run Quick Compare"
-    },
-
-    audit:{
-      title:"Audit Log",
-      intro:"Every critical action (matching, stage changes, exports, etc.) is logged here.",
-      list:"Events", clear:"Clear Audit", resetAll:"Reset All Data"
-    },
-
-    guide:{
-      title:"How to use shen-gen?",
-      sub:"A professional flow to get a clear output in 3 minutes",
-      s1t:"1) Pick a role from preset pack", s1d:"Template selection auto-fills Must/Nice/Red/Questions.",
-      s2t:"2) Upload CV", s2d:"Upload PDF/DOCX/TXT → parse to text → save candidate.",
-      s3t:"3) Match & Rank", s3d:"Score + evidence + Q&A in one place. If it’s not in the text: Not found.",
-      s4t:"4) Shortlist, pipeline, compare", s4d:"Push top 3, move in pipeline, compare A/B.",
-      s5t:"Export to Excel", s5d:"CSV export with UTF-8 BOM. Semicolon/comma handled by locale.",
-      s6t:"Quick demo", s6d:"Fill demo → add 2 sample candidates → run matching.",
-      demo:"Fill demo", go:"Go to Match"
-    },
-
-    status:{fit:"Fit", review:"Review", weak:"Not fit", confirmed:"Confirmed", likely:"Likely", notfound:"Not found"},
-
-    misc:{
-      none:"—",
-      notFound:"Not found in text (data may be missing).",
-      footer:"shen-gen: Evidence-required, rule-based mini ATS. PDF/DOCX parsing is done in-browser.",
-      presetPH:"— Select template —",
-      presetPack:"Preset Pack",
-      parsing:"Parsing file",
-      parsedOk:"Parsed",
-      parsedErr:"Could not parse file (format/permissions/corruption).",
-      exportOk:"Excel export created.",
-      needJobCand:"You need a job and at least 1 candidate first.",
-      quickReady:"Both files ready for Quick Compare.",
-      quickNotReady:"Upload both files for Quick Compare."
-    },
-
-    placeholders:{
-      roleSearch:"e.g. Backend, PO, Data, Finance...",
-      jobTitle:"e.g. Senior Business Analyst",
-      jobLoc:"Istanbul / Remote",
-      must:"e.g. SQL, API, Agile, BPMN",
-      nice:"e.g. Jira, Confluence, Postman",
-      red:"e.g. fake, plagiarism",
-      candName:"Candidate full name",
-      source:"LinkedIn / Referral / Application",
-      tags:"e.g. Senior, Remote, FinTech",
-      cv:"Paste CV text here or upload a file…",
-      li:"Paste LinkedIn text here or upload a file…"
+    function logAudit(msg){
+      const area = $("#auditLog");
+      area.value = `[${now()}] ${msg}\n` + area.value;
     }
-  }
-};
-let LANG = "tr";
-function t(path){
-  const parts = path.split(".");
-  let cur = I18N[LANG];
-  for(const p of parts){ cur = cur?.[p]; }
-  return cur ?? path;
-}
-
-/* =========================
-   ROLE PRESET PACK (enterprise-style)
-   8 groups with multiple roles each.
-========================= */
-const ROLE_LIBRARY = {
-  tech: [
-    mkRole("Backend Developer","Backend Developer",
-      ["api","database","sql","authentication","testing","git"],
-      ["docker","kubernetes","ci/cd","microservices","observability","redis","kafka"],
-      ["no production","copy paste projects"],
-      ["prod tecrübesi yok","kopya projeler"],
-      ["Bir API için ölçek/perf kanıtı var mı? (latency, throughput)","Test yaklaşımı var mı? (unit/integration)","Log/monitoring pratik consider edilmiş mi?"],
-      ["Evidence of scaling/perf? (latency/throughput)","Testing approach? (unit/integration)","Logging/monitoring practices?"]
-    ),
-    mkRole("Frontend Developer","Frontend Developer",
-      ["javascript","typescript","react","ui","testing"],
-      ["next.js","performance","accessibility","storybook","cypress"],
-      ["no portfolio"],["portföy yok"],
-      ["UI komponentleri ve state management kanıtı var mı?","Performans iyileştirme örneği var mı?","Test otomasyonu var mı?"],
-      ["Evidence of components/state mgmt?","Any performance wins?","Any UI test automation?"]
-    ),
-    mkRole("Mobile Developer (iOS/Android)","Mobile Developer (iOS/Android)",
-      ["swift","kotlin","mobile","api","release"],
-      ["ci/cd","security","push notification","crashlytics"],
-      ["no store release"],["store release yok"],
-      ["Store release/CI tecrübesi var mı?","Güvenlik (keychain/keystore) kanıtı var mı?","Crash/analytics kullanmış mı?"],
-      ["Store release/CI experience?","Security (keychain/keystore) evidence?","Crash/analytics usage?"]
-    ),
-    mkRole("DevOps Engineer","DevOps Engineer",
-      ["ci/cd","linux","docker","kubernetes","monitoring"],
-      ["terraform","helm","sre","incident","security"],
-      ["no oncall"],["oncall tecrübesi yok"],
-      ["CI/CD pipeline kurmuş mu?","İzleme/alerting kanıtı var mı?","Incident/oncall süreçlerinde yer almış mı?"],
-      ["Built CI/CD pipelines?","Monitoring/alerting evidence?","Incident/oncall recall?"]
-    ),
-    mkRole("QA Engineer","QA Engineer",
-      ["test plan","test case","automation","bug","regression"],
-      ["cypress","selenium","postman","api testing","jira"],
-      ["no test artifacts"],["test çıktısı yok"],
-      ["Test dokümanı kanıtı var mı?","Otomasyon kapsamı nedir?","API test tecrübesi var mı?"],
-      ["Evidence of test artifacts?","Automation scope?","API testing experience?"]
-    ),
-    mkRole("Security Engineer","Security Engineer",
-      ["security","threat modeling","vulnerability","iam","logging"],
-      ["siem","owasp","penetration test","zero trust"],
-      ["claims without proof"],["kanıtsız iddia"],
-      ["OWASP/Threat modeling kanıtı var mı?","SIEM/IR süreç deneyimi var mı?","IAM politikaları üretmiş mi?"],
-      ["OWASP/threat modeling evidence?","SIEM/IR exposure?","Created IAM policies?"]
-    ),
-  ],
-
-  product: [
-    mkRole("Senior Business Analyst","Senior Business Analyst",
-      ["business analysis","user story","acceptance criteria","bpmn","api","sql","stakeholder"],
-      ["jira","confluence","postman","microservices","kyc","aml","ux"],
-      ["vague responsibilities"],["belirsiz sorumluluk"],
-      ["Uçtan uca süreç analizi kanıtı var mı?","API entegrasyon örneği var mı?","Kabul kriterleri yazmış mı?"],
-      ["Evidence of end-to-end analysis?","API integration examples?","Acceptance criteria evidence?"]
-    ),
-    mkRole("Product Owner","Product Owner",
-      ["backlog","prioritization","roadmap","stakeholder","discovery","metrics","user story"],
-      ["a/b test","analytics","sql","ux","release planning","okr"],
-      ["no ownership"],["ownership yok"],
-      ["Önceliklendirme çerçevesi kullanıyor mu? (RICE/WSJF)","Metrik/OKR kanıtı var mı?","Discovery çıktısı var mı?"],
-      ["Uses prioritization frameworks? (RICE/WSJF)","OKR/metrics evidence?","Discovery outputs?"]
-    ),
-    mkRole("Product Manager","Product Manager",
-      ["product strategy","roadmap","metrics","stakeholder","go-to-market"],
-      ["pricing","research","experimentation","analytics"],
-      ["no outcomes"],["outcome yok"],
-      ["Outcome odaklı örnekler var mı?","Go-to-market tecrübesi var mı?","Metrik seti tanımlamış mı?"],
-      ["Outcome examples?","Go-to-market experience?","Defined metrics?"]
-    ),
-    mkRole("UX Designer","UX Designer",
-      ["ux","user research","wireframe","prototype","design system"],
-      ["figma","a/b test","usability","accessibility"],
-      ["no case studies"],["case study yok"],
-      ["Case study kanıtı var mı?","Kullanıcı araştırması yapmış mı?","Design system tecrübesi var mı?"],
-      ["Case study evidence?","Did user research?","Design system experience?"]
-    ),
-    mkRole("Scrum Master","Scrum Master",
-      ["scrum","facilitation","sprint","retrospective","impediments"],
-      ["metrics","coaching","kanban","agile transformation"],
-      ["no facilitation"],["facilitation yok"],
-      ["Takımı nasıl koçladığına dair kanıt var mı?","Impediment hatırlatmaları var mı?","Agile metrikleri takip etmiş mi?"],
-      ["Coaching evidence?","Handled impediments?","Tracked agile metrics?"]
-    ),
-  ],
-
-  data: [
-    mkRole("Data Analyst","Data Analyst",
-      ["sql","dashboards","analysis","reporting","data visualization"],
-      ["power bi","tableau","python","ab testing","statistics"],
-      ["no sample work"],["örnek çalışma yok"],
-      ["SQL çıktısı/dash kanıtı var mı?","İstatistik/A-B test tecrübesi var mı?","Veri görselleştirme aracı kullanmış mı?"],
-      ["SQL/dashboard evidence?","Stats/A-B testing?","Visualization tools?"]
-    ),
-    mkRole("Data Engineer","Data Engineer",
-      ["etl","pipelines","sql","data warehouse","python"],
-      ["spark","kafka","airflow","dbt","cloud"],
-      ["no prod pipelines"],["prod pipeline yok"],
-      ["Pipeline/ETL kanıtı var mı?","DW modelleme tecrübesi var mı?","Streaming (Kafka) görmüş mü?"],
-      ["Pipeline/ETL evidence?","Warehouse modeling?","Streaming exposure?"]
-    ),
-    mkRole("ML Engineer","ML Engineer",
-      ["machine learning","python","modeling","evaluation","deployment"],
-      ["mlops","feature store","monitoring","llm","rag"],
-      ["no evaluation"],["değerlendirme yok"],
-      ["Model değerlendirme metrikleri var mı?","Prod deployment/monitoring var mı?","MLOps araçları kullanmış mı?"],
-      ["Evaluation metrics?","Prod deployment/monitoring?","MLOps tools?"]
-    ),
-    mkRole("BI Developer","BI Developer",
-      ["power bi","semantic model","dax","reporting","sql"],
-      ["tabular","data governance","performance"],
-      ["no governance"],["governance yok"],
-      ["DAX/modelleme kanıtı var mı?","Rapor performansı iyileştirme var mı?","Versiyonlama/gov var mı?"],
-      ["DAX/model evidence?","Report perf improvements?","Governance?"]
-    ),
-  ],
-
-  finance: [
-    mkRole("Finance Specialist","Finance Specialist",
-      ["reporting","excel","budget","variance","financial statements"],
-      ["ifrs","power bi","forecasting","sql"],
-      ["compliance risk"],["uyum riski"],
-      ["Bütçe/gerçekleşen analizi kanıtı var mı?","Raporlama araçları kullanmış mı?","IFRS tecrübesi var mı?"],
-      ["Budget vs actual evidence?","Reporting tools used?","IFRS exposure?"]
-    ),
-    mkRole("Accounting Specialist","Accounting Specialist",
-      ["accounting","reconciliation","invoice","ledger","excel"],
-      ["ifrs","sap","tax","closing"],
-      ["errors"],["hata eğilimi"],
-      ["Kapanış süreç tecrübesi var mı?","SAP/ERP geçmiş mi?","Mutabakat kanıtı var mı?"],
-      ["Closing experience?","SAP/ERP usage?","Reconciliation evidence?"]
-    ),
-    mkRole("Risk Analyst","Risk Analyst",
-      ["risk","analysis","reporting","controls","compliance"],
-      ["var","stress test","audit","governance"],
-      ["no controls"],["kontrol yok"],
-      ["Risk metrikleri/rapor kanıtı var mı?","Kontrol çerçevesi kullanmış mı?","Denetim tecrübesi var mı?"],
-      ["Risk metrics evidence?","Control framework?","Audit exposure?"]
-    ),
-  ],
-
-  sales: [
-    mkRole("B2B Sales","B2B Sales",
-      ["pipeline","crm","lead","negotiation","closing"],
-      ["saas","enterprise","forecast","account management"],
-      ["no quota evidence"],["hedef kanıtı yok"],
-      ["Quota/target kanıtı var mı?","Pipeline metrikleri nedir?","CRM kullanım kanıtı var mı?"],
-      ["Quota evidence?","Pipeline metrics?","CRM usage evidence?"]
-    ),
-    mkRole("Account Manager","Account Manager",
-      ["account management","renewals","crm","relationship","upsell"],
-      ["qbr","enterprise","success metrics"],
-      ["no retention"],["retention yok"],
-      ["Renewal/retention kanıtı var mı?","QBR yürütmüş mü?","Upsell örnekleri var mı?"],
-      ["Renewal/retention evidence?","Ran QBRs?","Upsell examples?"]
-    ),
-    mkRole("Sales Operations","Sales Operations",
-      ["crm","process","reporting","pipeline hygiene","analysis"],
-      ["revops","automation","excel","dashboards"],
-      ["no process"],["süreç yok"],
-      ["CRM süreç standardı kurmuş mu?","Rapor/dash kanıtı var mı?","Otomasyon örneği var mı?"],
-      ["Built CRM processes?","Reporting evidence?","Automation examples?"]
-    ),
-  ],
-
-  ops: [
-    mkRole("Operations / Backoffice","Operations / Backoffice",
-      ["reconciliation","settlement","sla","process","attention to detail"],
-      ["itil","incident","automation","reporting"],
-      ["cannot explain process"],["süreç anlatamıyor"],
-      ["Mutabakat/settlement örneği var mı?","SLA/metrik takibi yapmış mı?","Operasyonel iyileştirme var mı?"],
-      ["Reconciliation/settlement examples?","SLA/metrics tracking?","Ops improvements?"]
-    ),
-    mkRole("Customer Support","Customer Support",
-      ["support","ticket","communication","sla","problem solving"],
-      ["itil","crm","knowledge base"],
-      ["unprofessional tone"],["profesyonel olmayan dil"],
-      ["SLA/ticket yönetimi kanıtı var mı?","Zor müşteri örneği var mı?","Knowledge base oluşturmuş mu?"],
-      ["SLA/ticket evidence?","Difficult customer example?","Built knowledge base?"]
-    ),
-    mkRole("Project Coordinator","Project Coordinator",
-      ["coordination","planning","communication","stakeholder","tracking"],
-      ["jira","confluence","risk","dependencies"],
-      ["no tracking"],["takip yok"],
-      ["Plan/rapor kanıtı var mı?","Risk/bağımlılık takibi yapmış mı?","Stakeholder yönetmiş mi?"],
-      ["Plan/report evidence?","Tracked risks/deps?","Managed stakeholders?"]
-    ),
-  ],
-
-  hr: [
-    mkRole("Talent Acquisition","Talent Acquisition",
-      ["recruitment","screening","interviewing","talent acquisition","pipeline"],
-      ["ats","employer branding","sourcing","linkedin recruiter"],
-      ["biased language"],["önyargılı dil"],
-      ["ATS kullanımı kanıtı var mı?","Sourcing örnekleri var mı?","Mülakat süreci tasarlamış mı?"],
-      ["ATS usage evidence?","Sourcing examples?","Designed interview process?"]
-    ),
-    mkRole("HR Generalist","HR Generalist",
-      ["onboarding","employee relations","policies","hr operations","communication"],
-      ["compensation","performance","training"],
-      ["no policy"],["policy yok"],
-      ["Onboarding/policy kanıtı var mı?","Performans süreci tecrübesi var mı?","Eğitim/organizasyon yapmış mı?"],
-      ["Onboarding/policy evidence?","Performance process?","Training initiatives?"]
-    ),
-    mkRole("Compensation & Benefits","Compensation & Benefits",
-      ["compensation","benefits","benchmark","analysis","excel"],
-      ["job grading","ifrs","hr analytics"],
-      ["no benchmarks"],["benchmark yok"],
-      ["Benchmark/structure kanıtı var mı?","Ücret politikası oluşturmuş mu?","HR analytics kullanmış mı?"],
-      ["Benchmark evidence?","Built comp policies?","HR analytics usage?"]
-    ),
-  ],
-
-  legal: [
-    mkRole("Compliance Specialist","Compliance Specialist",
-      ["compliance","policies","audit","risk","reporting"],
-      ["aml","kyc","gdpr","sox","controls"],
-      ["no evidence"],["kanıt yok"],
-      ["Uyum politika/doküman kanıtı var mı?","Denetim çıktısı var mı?","AML/KYC/GDPR tecrübesi var mı?"],
-      ["Policy/document evidence?","Audit outputs?","AML/KYC/GDPR exposure?"]
-    ),
-    mkRole("Legal Counsel","Legal Counsel",
-      ["contracts","legal","negotiation","risk","compliance"],
-      ["ip","data privacy","regulatory"],
-      ["no contract work"],["sözleşme yok"],
-      ["Sözleşme müzakere kanıtı var mı?","KVKK/GDPR tecrübesi var mı?","Regülasyon takip etmiş mi?"],
-      ["Contract negotiation evidence?","Privacy exposure?","Regulatory experience?"]
-    ),
-    mkRole("Data Privacy Officer","Data Privacy Officer",
-      ["data privacy","gdpr","policies","risk","training"],
-      ["security","incident","dpa","privacy by design"],
-      ["no training"],["eğitim yok"],
-      ["DPA/policy kanıtı var mı?","Eğitim vermiş mi?","Incident yönetimine katılmış mı?"],
-      ["DPA/policy evidence?","Delivered trainings?","Incident involvement?"]
-    ),
-  ],
-};
-
-// helper to build role objects
-function mkRole(nameTR, nameEN, must, nice, redEN, redTR, qsTR, qsEN){
-  return { nameTR, nameEN, must, nice, redEN, redTR, qsTR, qsEN };
-}
-
-/* =========================
-   Storage
-========================= */
-const KEY = "shen_gen_app_pro_v1";
-function loadDB(){
-  const raw = localStorage.getItem(KEY);
-  if(raw) return JSON.parse(raw);
-  return { jobs:[], candidates:[], applications:[], audit:[], ui:{bannerHidden:false, guideSeen:false} };
-}
-function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
-let DB = loadDB();
-
-function uid(prefix){ return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
-function nowISO(){ return new Date().toISOString(); }
-function logAudit(action, entityType, entityId, before, after){
-  DB.audit.unshift({ id:uid("aud"), ts:nowISO(), action, entityType, entityId, before, after });
-  saveDB();
-  renderAudit();
-}
-
-/* =========================
-   UI helpers
-========================= */
-const $ = (id)=>document.getElementById(id);
-function toast(msg, kind="info"){
-  const el = $("toast");
-  el.style.display = "block";
-  el.innerHTML = (kind==="spin")
-    ? `<span class="spinner"></span><b>${escapeHtml(msg)}</b>`
-    : `<b>${escapeHtml(msg)}</b>`;
-  clearTimeout(el._t);
-  el._t = setTimeout(()=>{ el.style.display="none"; }, 2200);
-}
-
-/* =========================
-   Utils
-========================= */
-function csvToList(s){ return (s||"").split(",").map(x=>x.trim()).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i); }
-function norm(s){ return (s||"").toLowerCase().replace(/\s+/g," ").trim(); }
-function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-function escapeHtml(str){ return (str||"").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
-function findEvidence(text, keyword){
-  const raw = text || "";
-  const key = (keyword || "").toString().trim();
-  if(!raw || !key) return "";
-
-  const rawL = raw.toLowerCase();
-  const keyL = key.toLowerCase();
-
-  // 1) Direkt arama (index ham metinde doğru kalsın)
-  let idx = rawL.indexOf(keyL);
-
-  // 2) Direkt bulamazsa: ilk anlamlı token ile yakala
-  if(idx === -1){
-    const toks = keyL.split(/\s+/).filter(t => t.length >= 3);
-    for(const t of toks){
-      const j = rawL.indexOf(t);
-      if(j !== -1){ idx = j; break; }
+    function normalizeText(s){
+      if(!s) return "";
+      return s.toLowerCase()
+        .replaceAll("ı","i").replaceAll("İ","i")
+        .replaceAll("ş","s").replaceAll("Ş","s")
+        .replaceAll("ğ","g").replaceAll("Ğ","g")
+        .replaceAll("ü","u").replaceAll("Ü","u")
+        .replaceAll("ö","o").replaceAll("Ö","o")
+        .replaceAll("ç","c").replaceAll("Ç","c")
+        .replace(/[\u200B-\u200D\uFEFF]/g, "")
+        .replace(/\s+/g," ").trim();
     }
-    if(idx === -1) return "";
-  }
-
-  const start = Math.max(0, idx - 120);
-  const end = Math.min(raw.length, idx + key.length + 120);
-
-  return raw.slice(start, end).replace(/\s+/g, " ").trim();
-}
-
-function highlightSnippet(snippet, q){
-  if(!snippet) return "";
-  const qq = (q||"").trim();
-  if(!qq) return escapeHtml(snippet);
-  const tokens = qq.split(/\s+/).filter(Boolean).slice(0,10);
-  let out = escapeHtml(snippet);
-  for(const tok of tokens){
-    const re = new RegExp(tok.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-    out = out.replace(re, (m)=>`<span class="hl">${m}</span>`);
-  }
-  return out;
-}
-function extractYears(text){
-  const tN = norm(text);
-  const m1 = tN.match(/(\d{1,2})\s*(yıl|years|year)\b/);
-  if(m1) return parseInt(m1[1],10);
-  const years = [...tN.matchAll(/\b(19\d{2}|20\d{2})\b/g)].map(m=>parseInt(m[1],10));
-  if(years.length >= 2){
-    const minY = Math.min(...years), maxY = Math.max(...years);
-    const diff = maxY - minY;
-    if(diff >= 1 && diff <= 45) return diff;
-  }
-  return null;
-}
-
-/* =========================
-   Synonyms (lightweight)
-========================= */
-const SYN = {
-  global: {
-    "agile":["scrum","kanban","sprint","retrospective","standup"],
-    "api":["rest","soap","graphql","endpoint","swagger","openapi"],
-    "sql":["postgres","oracle","mssql","mysql","query","sorgu"],
-    "leadership":["team lead","takım lideri","managed","yönetti","mentoring","mentorluk"],
-    "crm":["salesforce","dynamics","hubspot","müşteri ilişkileri"],
-    "kpi":["okr","metrics","hedef","performans"],
-    "kyc":["aml","masak","know your customer","kimlik doğrulama","nfc","liveness"],
-    "devops":["ci/cd","pipeline","docker","kubernetes","terraform","helm"]
-  }
-};
-function getSynPack(jobGroup){
-  // keep it simple; extend later if needed
-  return {...SYN.global};
-}
-
-/* =========================
-   Evidence-required answering
-========================= */
-function answerQuestion(combinedText, q, synPack){
-  const tN = norm(combinedText);
-  const exact = findEvidence(combinedText, q);
-  if(exact){
-    return { level:"ok", label:t("status.confirmed"), evidence: exact };
-  }
-  // token hit
-  const tokens = (q||"").toLowerCase()
-    .split(/[^a-z0-9ğüşöçıİĞÜŞÖÇ]+/i)
-    .map(x=>x.trim()).filter(x=>x.length>=3);
-  for(const tok of tokens){
-    if(tN.includes(tok)){
-      const ev = findEvidence(combinedText, tok);
-      return { level:"ok", label:t("status.confirmed"), evidence: ev || "" };
+    function linesToList(txt){
+      return (txt || "").split(/\r?\n/g).map(s=>s.trim()).filter(Boolean);
     }
-  }
-  // synonyms
-  const qN = norm(q);
-  for(const key of Object.keys(synPack)){
-    const variants = [key].concat(synPack[key]||[]);
-    const hitInQ = variants.some(v=> qN.includes(norm(v)));
-    if(hitInQ){
-      for(const v of variants){
-        if(tN.includes(norm(v))){
-          const ev = findEvidence(combinedText, v);
-          return { level:"warn", label:t("status.likely"), evidence: ev || "" };
+    function nameFromLinkedInUrl(url){
+      try{
+        const u = new URL(url);
+        const m = u.pathname.match(/\/in\/([^\/?#]+)/i);
+        if(!m) return "";
+        const slug = m[1].replace(/[-_]+/g," ").replace(/\d+/g," ").replace(/\s+/g," ").trim();
+        if(!slug) return "";
+        return slug.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      }catch{ return ""; }
+    }
+    function nameFromFileName(fileName){
+      const clean = (fileName||"").replace(/\.[^.]+$/,"").replace(/[_\-]+/g," ").replace(/\d+/g," ").replace(/\s+/g," ").trim();
+      if(!clean) return "";
+      return clean.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+    }
+    function escapeHtml(s){
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    // Storage
+    const STORE_KEY = "adayiq_pro_v1";
+    const state = { job:{title:"",lang:"tr",must:[],nice:[]}, candidates:[], selectedCandidateId:null, lastRank:[] };
+
+    function saveState(){
+      localStorage.setItem(STORE_KEY, JSON.stringify({job:state.job,candidates:state.candidates}));
+      logAudit("Durum kaydedildi (localStorage).");
+    }
+    function loadState(){
+      const raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return;
+      try{
+        const snap = JSON.parse(raw);
+        if(snap.job) state.job = snap.job;
+        if(Array.isArray(snap.candidates)) state.candidates = snap.candidates;
+        logAudit("Durum yüklendi (localStorage).");
+      }catch(e){ logAudit("State yükleme hatası: "+e); }
+    }
+
+    // Synonyms (TR/EN)
+    const synonyms = {
+      "business analysis": ["business analysis","iş analizi","is analizi","iş analisti","is analisti","kıdemli iş analisti","kidemli is analisti","ba"],
+      "user story": ["user story","user stories","kullanıcı hikayesi","kullanici hikayesi","kullanıcı hikayeleri","userstory"],
+      "acceptance criteria": ["acceptance criteria","acceptance criterion","kabul kriteri","kabul kriterleri","ac","acceptance"],
+      "bpmn": ["bpmn","business process model and notation","iş süreci modelleme","is sureci modelleme","bpmn diyagram"],
+      "api": ["api","rest api","restful","soap","graphql","endpoint","servis","web servis","web service"],
+      "uml": ["uml","use case","sequence diagram","activity diagram","class diagram","kullanim senaryosu","kullanım senaryosu"],
+      "jira": ["jira","atlassian jira"],
+      "confluence": ["confluence","atlassian confluence"],
+      "sql": ["sql","postgres","oracle","mysql","mssql","sql server"],
+      "fintech": ["fintech","sermaye piyasasi","sermaye piyasası","yatirim","yatırım","brokerage","trading","otc","forex","spot fx"]
+    };
+
+    function expandCriterion(crit){
+      const k = normalizeText(crit);
+      if(synonyms[k]) return synonyms[k];
+      for(const key of Object.keys(synonyms)){ if(normalizeText(key)===k) return synonyms[key]; }
+      const out = new Set([crit,k]);
+      if(k.includes(" ")) out.add(k.replaceAll(" ",""));
+      return Array.from(out).filter(Boolean);
+    }
+
+    function findEvidence(hayRaw, critRaw){
+      const hay = normalizeText(hayRaw);
+      if(!hay) return {found:false,snippet:""};
+      const variants = expandCriterion(critRaw).map(normalizeText).filter(Boolean);
+
+      let idx = -1, hit = "";
+      for(const v of variants){ idx = hay.indexOf(v); if(idx!==-1){ hit=v; break; } }
+
+      if(idx===-1){
+        for(const v of variants){
+          const toks = v.split(" ").filter(t => t.length>=3);
+          if(toks.length>=2 && toks.every(t => hay.includes(t))){
+            idx = hay.indexOf(toks[0]); hit = toks.join(" "); break;
+          }
         }
       }
-    }
-  }
-  return { level:"bad", label:t("status.notfound"), evidence:"" };
-}
-
-function buildQA(job, candidate){
-  const syn = getSynPack(job.group || "auto");
-  const combined = (candidate.cvText||"") + "\n" + (candidate.liText||"");
-  const qs = job.questions || [];
-  return qs.map(q=>{
-    const a = answerQuestion(combined, q, syn);
-    return { q, ...a };
-  });
-}
-
-/* =========================
-   Scoring (rule-based)
-========================= */
-function scorecard(job, candidate, weights){
-  const combined = (candidate.cvText||"") + "\n" + (candidate.liText||"");
-  const combinedN = norm(combined);
-
-  const must = job.must || [];
-  const nice = job.nice || [];
-  const red  = job.red  || [];
-
-  const evidence = [];
-  let mustHit=0, niceHit=0, redHit=0;
-
-  for(const k of must){
-    const hit = combinedN.includes(norm(k));
-    if(hit) mustHit++;
-    evidence.push({type:"Must", key:k, hit, ev: hit ? findEvidence(combined, k) : ""});
-  }
-  for(const k of nice){
-    const hit = combinedN.includes(norm(k));
-    if(hit) niceHit++;
-    evidence.push({type:"Nice", key:k, hit, ev: hit ? findEvidence(combined, k) : ""});
-  }
-  for(const k of red){
-    const hit = combinedN.includes(norm(k));
-    if(hit) redHit++;
-    evidence.push({type:"Red", key:k, hit, ev: hit ? findEvidence(combined, k) : ""});
-  }
-
-  const years = extractYears(combined);
-  const minYears = Number(job.minYears || 0);
-  const loc = norm(job.location || "");
-  const locOk = loc ? combinedN.includes(loc) : true;
-
-  const mustCount = must.length || 0;
-  const niceCount = nice.length || 0;
-  const mustRatio = mustCount ? (mustHit/mustCount) : 0.60;
-  const niceRatio = niceCount ? (niceHit/niceCount) : 0.40;
-
-  let points=0, max=0;
-
-  const mustBlock = weights.wMust * (mustCount ? mustCount : 5);
-  max += mustBlock; points += mustBlock * mustRatio;
-
-  const niceBlock = weights.wNice * (niceCount ? niceCount : 6);
-  max += niceBlock; points += niceBlock * niceRatio;
-
-  max += weights.wYears;
-  if(minYears>0){
-    if(years==null) points += weights.wYears*0.35;
-    else points += (years>=minYears) ? weights.wYears : weights.wYears * clamp(years/minYears,0,1);
-  } else points += weights.wYears*0.6;
-
-  max += 4;
-  points += loc ? (locOk ? 4 : 1.5) : 2.5;
-
-  points -= (redHit * weights.wRed);
-
-  const score = clamp(Math.round((points/max)*100),0,100);
-
-  let bucket = t("status.weak");
-  if(score >= 75) bucket = t("status.fit");
-  else if(score >= 55) bucket = t("status.review");
-
-  return { score, bucket, meta:{mustHit,mustCount,niceHit,niceCount,redHit,years,locOk}, evidence };
-}
-
-/* =========================
-   File parsing (PDF/DOCX/TXT)
-========================= */
-async function parseFileToText(file){
-  if(!file) return "";
-  const name = (file.name||"").toLowerCase();
-
-  try{
-    toast(`${t("misc.parsing")}: ${file.name}`, "spin");
-
-    if(name.endsWith(".txt")){
-      const text = await file.text();
-      toast(t("misc.parsedOk"));
-      return text;
+      if(idx===-1) return {found:false,snippet:""};
+      const start = Math.max(0, idx-80), end = Math.min(hay.length, idx+hit.length+140);
+      const snippet = (start>0?"… ":"") + hay.slice(start,end).trim() + (end<hay.length?" …":"");
+      return {found:true,snippet};
     }
 
-    if(name.endsWith(".docx")){
-      const arrayBuffer = await file.arrayBuffer();
-      const result = await window.mammoth.extractRawText({arrayBuffer});
-      toast(t("misc.parsedOk"));
-      return result.value || "";
+    function scoreCandidate(candidate, job){
+      const combined = (candidate.cvText||"") + "\n" + (candidate.lnText||"");
+      const must = job.must||[], nice = job.nice||[];
+      const mustResults = must.map(c => ({c,...findEvidence(combined,c),kind:"must"}));
+      const niceResults = nice.map(c => ({c,...findEvidence(combined,c),kind:"nice"}));
+      const mustFound = mustResults.filter(r=>r.found).length;
+      const niceFound = niceResults.filter(r=>r.found).length;
+      const mustTotal = must.length||1, niceTotal = nice.length||0;
+      const mustScore = Math.round((mustFound/mustTotal)*80);
+      const niceScore = niceTotal ? Math.round((niceFound/niceTotal)*20) : 0;
+      const total = Math.min(100, mustScore+niceScore);
+      const fit = must.length ? (mustFound===must.length) : true;
+      return {total,fit,mustResults,niceResults,mustFound,mustTotal,niceFound,niceTotal};
     }
 
-    if(name.endsWith(".pdf")){
-      if(!window.pdfjsLib){
-        toast(t("misc.parsedErr"));
-        return "";
+    function downloadCSV(rows, fileName){
+      const esc = (v) => {
+        const s = (v ?? "").toString();
+        if(/[,"\n;]/.test(s)) return `"${s.replaceAll('"','""')}"`;
+        return s;
+      };
+      const csv = rows.map(r => r.map(esc).join(",")).join("\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Tabs
+    function setTab(tabId){
+      $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab===tabId));
+      ["tab-jobs","tab-candidates","tab-match","tab-compare","tab-audit"].forEach(id => $("#"+id).style.display = (id===tabId)?"":"none");
+      if(tabId==="tab-candidates") renderCandidateList();
+      if(tabId==="tab-compare") renderCompareSelects();
+    }
+    $$(".tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
+
+    // Candidate list
+    function renderCandidateList(){
+      const q = normalizeText($("#candSearch").value);
+      const list = $("#candList"); list.innerHTML = "";
+      const filtered = state.candidates.filter(c => {
+        if(!q) return true;
+        return normalizeText(c.name).includes(q) || normalizeText(c.tags).includes(q) || normalizeText(c.source).includes(q);
+      });
+      if(!filtered.length){
+        list.innerHTML = `<div class="hint">Henüz aday yok. Soldan “Aday Ekle”.</div>`;
+        $("#btnDeleteCandidate").disabled = true;
+        return;
       }
-      // configure worker
-      if(window.pdfjsLib.GlobalWorkerOptions && !window.pdfjsLib.GlobalWorkerOptions.workerSrc){
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js";
-      }
-      const data = new Uint8Array(await file.arrayBuffer());
-      const pdf = await window.pdfjsLib.getDocument({data}).promise;
+      filtered.sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||"")).forEach(c => {
+        const div = document.createElement("div");
+        div.className = "item"; div.style.cursor="pointer";
+        div.innerHTML = `
+          <div class="left">
+            <div class="title">${escapeHtml(c.name||"İsimsiz Aday")}</div>
+            <div class="meta">source: ${escapeHtml(c.source||"-")} • tags: ${escapeHtml(c.tags||"-")}</div>
+            <div class="meta">CV chars: ${(c.cvText||"").length} • LN chars: ${(c.lnText||"").length}</div>
+          </div>
+          <div class="badge">${state.selectedCandidateId===c.id ? "Seçili" : "Seç"}</div>
+        `;
+        div.onclick = () => selectCandidate(c.id);
+        list.appendChild(div);
+      });
+    }
 
-      let out = "";
-      for(let i=1; i<=pdf.numPages; i++){
+    function selectCandidate(id){
+      const c = state.candidates.find(x => x.id===id);
+      state.selectedCandidateId = id;
+      $("#btnDeleteCandidate").disabled = !c;
+      if(!c) return;
+      $("#candName").value = c.name||"";
+      $("#candSource").value = c.source||"";
+      $("#candTags").value = c.tags||"";
+      $("#cvText").value = c.cvText||"";
+      $("#lnText").value = c.lnText||"";
+      $("#cvFileInfo").innerHTML = `<span class="dot"></span> Dosya: ${escapeHtml(c.cvFileName||"—")}`;
+      $("#lnFileInfo").innerHTML = `<span class="dot"></span> Dosya: ${escapeHtml(c.lnFileName||"—")}`;
+      renderCandidateList();
+      renderCompareSelects();
+      toast("Aday seçildi", c.name||"İsimsiz Aday");
+      logAudit("Aday seçildi: "+(c.name||"İsimsiz"));
+    }
+
+    // Ranking
+    function renderRank(){
+      const q = normalizeText($("#rankSearch").value);
+      const f = $("#rankFilter").value;
+      const list = $("#rankList"); list.innerHTML = "";
+      const job = state.job;
+      if(!job.must?.length && !job.nice?.length){ list.innerHTML = `<div class="hint">Önce “Pozisyonlar” sekmesinden kriterleri kaydet.</div>`; return; }
+      if(!state.candidates.length){ list.innerHTML = `<div class="hint">Önce “Adaylar” sekmesinden aday ekle.</div>`; return; }
+
+      const ranked = state.candidates.map(c => ({c, s: scoreCandidate(c, job)})).sort((a,b)=>b.s.total-a.s.total);
+      state.lastRank = ranked;
+
+      const filtered = ranked.filter(r=>{
+        const hay = normalizeText((r.c.name||"")+" "+(r.c.tags||""));
+        if(q && !hay.includes(q)) return false;
+        if(f==="fit" && !r.s.fit) return false;
+        if(f==="nofit" && r.s.fit) return false;
+        return true;
+      });
+
+      filtered.forEach((r,i)=>{
+        const div = document.createElement("div");
+        div.className="item"; div.style.cursor="pointer";
+        div.innerHTML = `
+          <div class="left">
+            <div class="title">#${i+1} ${escapeHtml(r.c.name||"İsimsiz Aday")}</div>
+            <div class="meta">${escapeHtml(r.c.tags||"")}</div>
+            <div class="meta">MUST: ${r.s.mustFound}/${r.s.mustTotal} • NICE: ${r.s.niceFound}/${r.s.niceTotal||0}</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="score">${r.s.total}</div>
+            <div class="badge ${r.s.fit?"good":"bad"}">${r.s.fit?"Uygun":"Uygun Değil"}</div>
+          </div>
+        `;
+        div.onclick = () => showScoreCard(r.c.id);
+        list.appendChild(div);
+      });
+      if(!filtered.length) list.innerHTML = `<div class="hint">Filtreye göre sonuç yok.</div>`;
+    }
+
+    function showScoreCard(candidateId){
+      const r = state.lastRank.find(x => x.c.id===candidateId);
+      if(!r) return;
+      const c = r.c, s = r.s;
+      $("#scoreSub").textContent = `${c.name||"İsimsiz Aday"} • Skor: ${s.total} • MUST: ${s.mustFound}/${s.mustTotal}`;
+      const tb = $("#scoreTable"); tb.innerHTML = "";
+      const addRow = (crit, found, snippet) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><span class="pill"><span class="dot"></span> ${escapeHtml(crit)}</span></td>
+          <td>${found ? '<span class="v"></span>' : '<span class="x"></span>'}</td>
+          <td>${found ? `<div>${escapeHtml(snippet||"")}</div>` : `<div class="mini">Metinde bulunamadı.</div>`}</td>
+        `;
+        tb.appendChild(tr);
+      };
+      s.mustResults.forEach(rw=>addRow(rw.c,rw.found,rw.snippet));
+      s.niceResults.forEach(rw=>addRow(rw.c,rw.found,rw.snippet));
+      logAudit(`Skor kartı: ${c.name||"İsimsiz"} skor=${s.total}`);
+    }
+
+    // Compare
+    function renderCompareSelects(){
+      const arr = state.candidates.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+      const mk = (sel) => { sel.innerHTML = `<option value="">Seç…</option>` + arr.map(c=>`<option value="${c.id}">${escapeHtml(c.name||"İsimsiz Aday")}</option>`).join(""); };
+      mk($("#cmp1")); mk($("#cmp2"));
+    }
+    function runCompare(){
+      const id1=$("#cmp1").value, id2=$("#cmp2").value;
+      if(!id1||!id2||id1===id2){ $("#cmpOut").textContent="Karşılaştırma için 2 farklı aday seç."; return; }
+      const c1=state.candidates.find(x=>x.id===id1), c2=state.candidates.find(x=>x.id===id2);
+      const s1=scoreCandidate(c1,state.job), s2=scoreCandidate(c2,state.job);
+      $("#cmpOut").innerHTML = `
+        <div class="item"><div class="left"><div class="title">${escapeHtml(c1.name||"Aday 1")} (${s1.total})</div><div class="meta">MUST ${s1.mustFound}/${s1.mustTotal} • NICE ${s1.niceFound}/${s1.niceTotal||0}</div></div>
+        <div class="left" style="text-align:right"><div class="title">${escapeHtml(c2.name||"Aday 2")} (${s2.total})</div><div class="meta">MUST ${s2.mustFound}/${s2.mustTotal} • NICE ${s2.niceFound}/${s2.niceTotal||0}</div></div></div>
+        <div class="hint">Detaylı kanıt için “Eşleştir & Sırala” sekmesini kullan.</div>
+      `;
+      logAudit(`Karşılaştırma: ${c1.name} vs ${c2.name}`);
+    }
+
+    // Progress
+    function setProgress(pct,text){
+      $("#progBar").style.width = `${Math.max(0,Math.min(100,pct))}%`;
+      $("#progText").textContent = text || "Hazır.";
+    }
+
+    // PDF.js config
+    if(window.pdfjsLib){
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js";
+    }
+
+    async function extractTextFromPDF(arrayBuffer){
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      let full = "";
+      for(let i=1;i<=pdf.numPages;i++){
+        setProgress(Math.round((i-1)/pdf.numPages*100), `PDF okunuyor… Sayfa ${i}/${pdf.numPages}`);
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        const strings = content.items.map(it=>it.str).filter(Boolean);
-        out += strings.join(" ") + "\n";
+        full += content.items.map(it=>it.str).join(" ") + "\n";
+        await sleep(0);
       }
-      toast(t("misc.parsedOk"));
-      return out;
+      setProgress(100,"PDF okuma tamamlandı.");
+      return full;
+    }
+    async function extractTextFromDOCX(arrayBuffer){
+      setProgress(20,"DOCX okunuyor…");
+      const res = await mammoth.extractRawText({arrayBuffer});
+      setProgress(100,"DOCX okuma tamamlandı.");
+      return res.value || "";
+    }
+    async function extractTextFromTXT(file){
+      setProgress(20,"TXT okunuyor…");
+      const text = await file.text();
+      setProgress(100,"TXT okuma tamamlandı.");
+      return text || "";
     }
 
-    // fallback
-    const fallback = await file.text().catch(()=> "");
-    toast(fallback ? t("misc.parsedOk") : t("misc.parsedErr"));
-    return fallback;
+    async function handleFileInto(targetTextArea, fileInfoEl, file){
+      if(!file) return;
+      fileInfoEl.innerHTML = `<span class="dot"></span> Dosya: ${escapeHtml(file.name)} (${Math.round(file.size/1024)} KB)`;
+      await sleep(0); // file picker freeze fix
+      try{
+        setProgress(5,"Dosya hazırlanıyor…");
+        const ext=(file.name.split(".").pop()||"").toLowerCase();
+        let text="";
+        if(ext==="pdf" || file.type==="application/pdf"){
+          text = await extractTextFromPDF(await file.arrayBuffer());
+        }else if(ext==="docx" || (file.type||"").includes("officedocument")){
+          text = await extractTextFromDOCX(await file.arrayBuffer());
+        }else{
+          text = await extractTextFromTXT(file);
+        }
+        targetTextArea.value = text.trim();
+        if(!$("#candName").value.trim()){
+          const guess = nameFromFileName(file.name);
+          if(guess) $("#candName").value = guess;
+        }
+        toast("Metin çıkarıldı","Dosya içeriği okundu.");
+        logAudit(`Dosya okundu: ${file.name} chars=${text.length}`);
+      }catch(e){
+        setProgress(0,"Hata oluştu.");
+        toast("Okuma Hatası","PDF görsel olabilir veya dosya bozuk olabilir. Text PDF export deneyin.");
+        logAudit("Dosya okuma hatası: "+e);
+        console.error(e);
+      }
+      setProgress(0,"Hazır.");
+    }
 
-  }catch(e){
-    console.error(e);
-    toast(t("misc.parsedErr"));
-    return "";
-  }
-}
+    // Events
+    $("#btnHelp").addEventListener("click", ()=>toast("Nasıl Kullanılır","1) Pozisyon kriterlerini kaydet. 2) Aday ekle (CV yükle/metin yapıştır). 3) Eşleştir & Sırala’da skor+kanıt gör. 4) CSV indir."));
+    $("#btnClearAudit").addEventListener("click", ()=>{ $("#auditLog").value=""; toast("Denetim","Kayıt temizlendi."); });
 
-/* =========================
-   Rendering + i18n apply
-========================= */
-function applyLang(){
-  $("tagline").textContent = t("tagline");
-  $("modeLbl").textContent = t("modeLbl");
-  $("modeVal").textContent = t("modeVal");
-  $("outLbl").textContent = t("outLbl");
-  $("outVal").textContent = t("outVal");
-  $("helpBtnTxt").textContent = t("helpBtn");
-
-  $("bannerTitle").textContent = t("bannerTitle");
-  $("bannerText").textContent = t("bannerText");
-  $("hideBannerTxt").textContent = t("hideBanner");
-
-  $("tabJobs").textContent = t("tabs.jobs");
-  $("tabCand").textContent = t("tabs.candidates");
-  $("tabMatch").textContent = t("tabs.match");
-  $("tabPipe").textContent = t("tabs.pipeline");
-  $("tabCompare").textContent = t("tabs.compare");
-  $("tabAudit").textContent = t("tabs.audit");
-
-  // Jobs
-  $("jobCreateTitle").textContent = t("jobs.create");
-  $("presetBadge").textContent = t("misc.presetPack");
-  $("jobIntro").textContent = t("jobs.intro");
-  $("roleTplLbl").textContent = t("jobs.roleTpl");
-  $("roleTplHint").textContent = t("jobs.roleTplHint");
-  $("roleSearchLbl").textContent = t("jobs.roleSearch");
-  $("roleSearchHint").textContent = t("jobs.roleSearchHint");
-  $("jobListTitle").textContent = t("jobs.list");
-  $("jobSelectLbl").textContent = t("jobs.select");
-  $("jobTitleLbl").textContent = t("jobs.title");
-  $("jobGroupLbl").textContent = t("jobs.group");
-  $("jobLocLbl").textContent = t("jobs.loc");
-  $("mustLbl").textContent = t("jobs.must");
-  $("mustHint").textContent = t("jobs.mustHint");
-  $("niceLbl").textContent = t("jobs.nice");
-  $("niceHint").textContent = t("jobs.niceHint");
-  $("redLbl").textContent = t("jobs.red");
-  $("redHint").textContent = t("jobs.redHint");
-  $("minYearsLbl").textContent = t("jobs.years");
-  $("qSetLbl").textContent = t("jobs.qs");
-  $("qHint").textContent = t("jobs.qHint");
-  $("saveJob").textContent = t("jobs.save");
-  $("jobTemplate").textContent = t("jobs.tpl");
-  $("resetJob").textContent = t("jobs.reset");
-  $("deleteJob").textContent = t("jobs.del");
-  $("cloneJob").textContent = t("jobs.clone");
-  $("exportJobDef").textContent = t("jobs.exportDef");
-  $("grpAuto").textContent = (LANG==="tr") ? "Otomatik" : "Auto";
-
-  // Candidates
-  $("candCreateTitle").textContent = t("cand.create");
-  $("candIntro").textContent = t("cand.intro");
-  $("candListTitle").textContent = t("cand.list");
-  $("candSelectLbl").textContent = t("cand.select");
-  $("candNameLbl").textContent = t("cand.name");
-  $("candSourceLbl").textContent = t("cand.source");
-  $("candTagsLbl").textContent = t("cand.tags");
-  $("cvFileLbl").textContent = t("cand.cvFile");
-  $("cvFileHint").textContent = t("cand.cvFileHint");
-  $("liFileLbl").textContent = t("cand.liFile");
-  $("liFileHint").textContent = t("cand.liFileHint");
-  $("cvTextLbl").textContent = t("cand.cv");
-  $("liTextLbl").textContent = t("cand.li");
-  $("saveCand").textContent = t("cand.save");
-  $("resetCand").textContent = t("cand.reset");
-  $("deleteCand").textContent = t("cand.del");
-  $("exportCandidates").textContent = t("cand.exportAll");
-  $("candSearch").placeholder = t("cand.searchPH");
-
-  // Match
-  $("matchTitle").textContent = t("match.title");
-  $("matchIntro").textContent = t("match.intro");
-  $("matchJobLbl").textContent = t("match.job");
-  $("matchWeightsLbl").textContent = t("match.weights");
-  $("weightHint").textContent = t("match.weightHint");
-  $("runMatch").textContent = t("match.run");
-  $("pushShortlist").textContent = t("match.push");
-  $("exportShortlist").textContent = t("match.export");
-  $("exportAllRank").textContent = t("match.exportAll");
-  $("rankLbl").textContent = t("match.ranking");
-  $("rankEmpty").textContent = t("match.rankEmpty");
-  $("matchDetailTitle").textContent = t("match.detailTitle");
-  $("pickAppLbl").textContent = t("match.pick");
-  $("qaLbl").textContent = t("match.qa");
-  $("eviLbl").textContent = t("match.evi");
-  $("rankSearch").placeholder = t("match.rankSearchPH");
-
-  const ths = $("eviTable").querySelectorAll("thead th");
-  ths[0].textContent = t("match.cols.crit");
-  ths[1].textContent = t("match.cols.status");
-  ths[2].textContent = t("match.cols.ev");
-
-  // Pipeline
-  $("pipeTitle").textContent = t("pipe.title");
-  $("pipeJobLbl").textContent = t("pipe.job");
-  $("pipeHintLbl").textContent = t("pipe.hintLbl");
-  $("pipeHint").textContent = t("pipe.hint");
-
-  // Compare
-  $("compareTitle").textContent = t("cmp.title");
-  $("compareIntro").textContent = t("cmp.intro");
-  $("cmpJobLbl").textContent = t("cmp.job");
-  $("cmpALbl").textContent = t("cmp.a");
-  $("cmpBLbl").textContent = t("cmp.b");
-  $("runCompare").textContent = t("cmp.run");
-  $("exportCompare").textContent = t("cmp.export");
-  $("cmpOutLbl").textContent = t("cmp.out");
-  $("cmpQaTitle").textContent = t("cmp.qa");
-  $("quickCmpTitle").textContent = t("cmp.quickTitle");
-  $("qcAFileLbl").textContent = t("cmp.qcA");
-  $("qcBFileLbl").textContent = t("cmp.qcB");
-  $("runQuickCompare").textContent = t("cmp.qcRun");
-
-  // Audit
-  $("auditTitle").textContent = t("audit.title");
-  $("auditIntro").textContent = t("audit.intro");
-  $("auditListLbl").textContent = t("audit.list");
-  $("clearAudit").textContent = t("audit.clear");
-  $("clearAll").textContent = t("audit.resetAll");
-
-  // Guide
-  $("guideTitle").textContent = t("guide.title");
-  $("guideSubtitle").textContent = t("guide.sub");
-  $("g1t").textContent = t("guide.s1t"); $("g1d").textContent = t("guide.s1d");
-  $("g2t").textContent = t("guide.s2t"); $("g2d").textContent = t("guide.s2d");
-  $("g3t").textContent = t("guide.s3t"); $("g3d").textContent = t("guide.s3d");
-  $("g4t").textContent = t("guide.s4t"); $("g4d").textContent = t("guide.s4d");
-  $("g5t").textContent = t("guide.s5t"); $("g5d").textContent = t("guide.s5d");
-  $("g6t").textContent = t("guide.s6t"); $("g6d").textContent = t("guide.s6d");
-  $("demoFill").textContent = t("guide.demo");
-  $("goMatch").textContent = t("guide.go");
-
-  // placeholders
-  $("roleSearch").placeholder = t("placeholders.roleSearch");
-  $("jobTitle").placeholder = t("placeholders.jobTitle");
-  $("jobLoc").placeholder = t("placeholders.jobLoc");
-  $("jobMust").placeholder = t("placeholders.must");
-  $("jobNice").placeholder = t("placeholders.nice");
-  $("jobRed").placeholder = t("placeholders.red");
-  $("candName").placeholder = t("placeholders.candName");
-  $("candSource").placeholder = t("placeholders.source");
-  $("candTags").placeholder = t("placeholders.tags");
-  $("candCV").placeholder = t("placeholders.cv");
-  $("candLI").placeholder = t("placeholders.li");
-
-  $("footer").textContent = t("misc.footer");
-
-  populateRoleTemplates(); // refresh language in preset list
-  refreshStagesLabel();
-}
-
-function refreshStagesLabel(){
-  // rebuild pipeline board when language changes
-  if($("page-pipeline").style.display !== "none"){
-    renderPipeline();
-  }
-}
-
-/* =========================
-   Preset dropdown
-========================= */
-let ALL_PRESETS = [];
-function buildPresetIndex(){
-  const out = [];
-  for(const group of Object.keys(ROLE_LIBRARY)){
-    ROLE_LIBRARY[group].forEach((r,idx)=>{
-      out.push({
-        group,
-        idx,
-        labelTR: `${group.toUpperCase()} • ${r.nameTR}`,
-        labelEN: `${group.toUpperCase()} • ${r.nameEN}`,
-        key: `${group}::${idx}`
+    $("#btnExport").addEventListener("click", ()=>{
+      const job=state.job;
+      const header=["Name","Source","Tags","Score","Fit","MustFound","MustTotal","NiceFound","NiceTotal"];
+      const rows=[header];
+      state.candidates.forEach(c=>{
+        const s=(job.must?.length||job.nice?.length) ? scoreCandidate(c,job) : {total:"",fit:false,mustFound:"",mustTotal:"",niceFound:"",niceTotal:""};
+        rows.push([c.name||"",c.source||"",c.tags||"",s.total,s.fit?"FIT":"NOFIT",s.mustFound,s.mustTotal,s.niceFound,s.niceTotal||0]);
       });
-    });
-  }
-  ALL_PRESETS = out;
-}
-buildPresetIndex();
-
-function populateRoleTemplates(filterText=""){
-  const sel = $("roleTpl");
-  if(!sel) return;
-
-  const q = norm(filterText);
-  sel.innerHTML = "";
-  const empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = t("misc.presetPH");
-  sel.appendChild(empty);
-
-  const items = ALL_PRESETS.filter(p=>{
-    if(!q) return true;
-    const label = (LANG==="tr") ? p.labelTR : p.labelEN;
-    return norm(label).includes(q);
-  });
-
-  for(const p of items){
-    const opt = document.createElement("option");
-    opt.value = p.key;
-    opt.textContent = (LANG==="tr") ? p.labelTR : p.labelEN;
-    sel.appendChild(opt);
-  }
-}
-
-function applyRoleTemplate(val){
-  if(!val) return;
-  const [g, idxS] = val.split("::");
-  const r = ROLE_LIBRARY[g]?.[Number(idxS)];
-  if(!r) return;
-
-  $("jobGroup").value = g;
-  $("jobTitle").value = (LANG==="tr") ? r.nameTR : r.nameEN;
-  $("jobMust").value = (r.must||[]).join(", ");
-  $("jobNice").value = (r.nice||[]).join(", ");
-  $("jobRed").value = ((LANG==="tr") ? r.redTR : r.redEN).join(", ");
-  $("jobQs").value = ((LANG==="tr") ? r.qsTR : r.qsEN).join("\n");
-  $("jobMinYears").value = (g==="tech"||g==="data") ? 3 : 5;
-}
-
-/* =========================
-   Job/Candidate rendering
-========================= */
-function renderJobs(){
-  const sel = $("jobSelect");
-  const m1 = $("matchJob");
-  const p1 = $("pipeJob");
-  const c1 = $("cmpJob");
-  [sel,m1,p1,c1].forEach(s=>{ s.innerHTML=""; });
-
-  if(!DB.jobs.length){
-    const opt = document.createElement("option");
-    opt.value=""; opt.textContent = t("misc.none");
-    [sel,m1,p1,c1].forEach(s=> s.appendChild(opt.cloneNode(true)));
-    $("jobDetail").textContent = t("misc.none");
-    return;
-  }
-  DB.jobs.forEach(j=>{
-    const opt = document.createElement("option");
-    opt.value=j.id; opt.textContent = j.title;
-    [sel,m1,p1,c1].forEach(s=> s.appendChild(opt.cloneNode(true)));
-  });
-  if(!sel.value) sel.value = DB.jobs[0].id;
-  if(!m1.value) m1.value = DB.jobs[0].id;
-  if(!p1.value) p1.value = DB.jobs[0].id;
-  if(!c1.value) c1.value = DB.jobs[0].id;
-  renderJobDetail();
-}
-
-function renderJobDetail(){
-  const id = $("jobSelect").value;
-  const j = DB.jobs.find(x=>x.id===id);
-  if(!j){ $("jobDetail").textContent = t("misc.none"); return; }
-  $("jobDetail").innerHTML =
-    `<b>${escapeHtml(j.title)}</b><br>
-     group: ${escapeHtml(j.group||"auto")} • minYears: ${escapeHtml(String(j.minYears||0))} • location: ${escapeHtml(j.location||"")}<br>
-     must: ${escapeHtml((j.must||[]).join(", "))}<br>
-     nice: ${escapeHtml((j.nice||[]).join(", "))}<br>
-     red: ${escapeHtml((j.red||[]).join(", "))}<br>
-     questions: ${escapeHtml((j.questions||[]).length.toString())}`;
-}
-
-function renderCandidates(){
-  const sel = $("candSelect");
-  sel.innerHTML="";
-
-  const q = norm($("candSearch").value||"");
-  const f = $("candFilter").value || "all";
-
-  let list = DB.candidates.slice();
-  if(q){
-    list = list.filter(c=>{
-      const s = norm((c.name||"") + " " + (c.source||"") + " " + (c.tags||[]).join(" "));
-      return s.includes(q);
-    });
-  }
-  if(f==="hasCv") list = list.filter(c=>(c.cvText||"").trim().length>30);
-  if(f==="hasLi") list = list.filter(c=>(c.liText||"").trim().length>30);
-
-  $("candCount").textContent = String(DB.candidates.length);
-
-  if(!list.length){
-    const opt = document.createElement("option");
-    opt.value=""; opt.textContent=t("misc.none");
-    sel.appendChild(opt);
-    $("candDetail").textContent=t("misc.none");
-    return;
-  }
-
-  list.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value=c.id;
-    const flags = [
-      (c.cvText||"").trim().length>30 ? "CV" : "",
-      (c.liText||"").trim().length>30 ? "LI" : ""
-    ].filter(Boolean).join(" • ");
-    opt.textContent = `${c.name || "(no name)"}${flags ? " • " + flags : ""}`;
-    sel.appendChild(opt);
-  });
-
-  if(!sel.value || !list.some(x=>x.id===sel.value)) sel.value = list[0].id;
-  renderCandDetail();
-}
-
-function renderCandDetail(){
-  const id = $("candSelect").value;
-  const c = DB.candidates.find(x=>x.id===id);
-  if(!c){ $("candDetail").textContent=t("misc.none"); return; }
-  $("candDetail").innerHTML =
-    `<b>${escapeHtml(c.name||"")}</b><br>
-     source: ${escapeHtml(c.source||"")}<br>
-     tags: ${escapeHtml((c.tags||[]).join(", "))}<br>
-     cv chars: ${(c.cvText||"").length} • li chars: ${(c.liText||"").length}`;
-}
-
-/* =========================
-   Applications
-========================= */
-function ensureApplication(jobId, candId){
-  let a = DB.applications.find(x=>x.jobId===jobId && x.candId===candId);
-  if(!a){
-    a = {
-      id:uid("app"),
-      jobId, candId,
-      stage:(LANG==="tr" ? "Yeni" : "New"),
-      score:null, bucket:null, qa:[], evidence:[],
-      updatedAt:nowISO()
-    };
-    DB.applications.push(a);
-    saveDB();
-    logAudit("APPLICATION_CREATE","Application",a.id,null,a);
-  }
-  return a;
-}
-
-/* =========================
-   MATCH & RANK
-========================= */
-let LAST_RANK = [];
-function runMatching(){
-  const jobId = $("matchJob").value;
-  const job = DB.jobs.find(j=>j.id===jobId);
-  if(!job || !DB.candidates.length){
-    toast(t("misc.needJobCand"));
-    return;
-  }
-
-  const weights = {
-    wMust:Number($("wMust").value||12),
-    wNice:Number($("wNice").value||5),
-    wYears:Number($("wYears").value||8),
-    wRed:Number($("wRed").value||10)
-  };
-
-  const ranked = [];
-  DB.candidates.forEach(c=>{
-    const app = ensureApplication(job.id, c.id);
-    const before = {...app};
-    const sc = scorecard(job, c, weights);
-    const qa = buildQA(job, c);
-
-    app.score = sc.score;
-    app.bucket = sc.bucket;
-    app.evidence = sc.evidence;
-    app.qa = qa;
-    app.updatedAt = nowISO();
-
-    ranked.push({appId:app.id, candId:c.id, score:sc.score, bucket:sc.bucket});
-    logAudit("MATCH_RUN","Application",app.id,before,app);
-  });
-
-  ranked.sort((a,b)=>b.score-a.score);
-  LAST_RANK = ranked;
-
-  $("rankEmpty").style.display = ranked.length ? "none" : "block";
-  $("rankCount").textContent = String(ranked.length);
-
-  renderRanking();
-  rebuildAppSelect();
-  renderAppDetail();
-}
-
-function renderRanking(){
-  const q = norm($("rankSearch").value||"");
-  const filter = $("rankFilter").value || "all";
-
-  const jobId = $("matchJob").value;
-  const job = DB.jobs.find(j=>j.id===jobId);
-
-  let items = LAST_RANK.slice();
-  items = items.filter(r=>{
-    const c = DB.candidates.find(x=>x.id===r.candId);
-    const text = norm((c?.name||"") + " " + (c?.tags||[]).join(" "));
-    if(q && !text.includes(q)) return false;
-    if(filter==="fit" && r.bucket!==t("status.fit")) return false;
-    if(filter==="review" && r.bucket!==t("status.review")) return false;
-    if(filter==="weak" && r.bucket!==t("status.weak")) return false;
-    return true;
-  });
-
-  $("ranking").innerHTML = items.map((r,i)=>{
-    const c = DB.candidates.find(x=>x.id===r.candId);
-    const tags = (c?.tags||[]).slice(0,4).join(", ");
-    return `<div class="candCard" data-app="${r.appId}">
-      <b>#${i+1} ${escapeHtml(c?.name||"")}</b>
-      <div class="candMeta">
-        <span class="pill2 ok">${escapeHtml(String(r.score))}</span>
-        <span class="pill2 warn">${escapeHtml(r.bucket||"")}</span>
-        ${tags ? `<span class="pill2">${escapeHtml(tags)}</span>` : ""}
-      </div>
-    </div>`;
-  }).join("") || "";
-}
-
-function rebuildAppSelect(){
-  const aSel = $("appSelect");
-  aSel.innerHTML="";
-  LAST_RANK.forEach(r=>{
-    const c = DB.candidates.find(x=>x.id===r.candId);
-    const opt = document.createElement("option");
-    opt.value = r.appId;
-    opt.textContent = `${c?.name||""} • ${r.score}`;
-    aSel.appendChild(opt);
-  });
-  if(LAST_RANK.length) aSel.value = LAST_RANK[0].appId;
-}
-
-function renderAppDetail(){
-  const appId = $("appSelect").value;
-  const app = DB.applications.find(x=>x.id===appId);
-  if(!app){ $("scoreBadge").textContent=t("misc.none"); return; }
-  const cand = DB.candidates.find(c=>c.id===app.candId);
-  $("scoreBadge").innerHTML = `<b>${escapeHtml(cand?.name||"")}</b> • score: <span class="score">${escapeHtml(String(app.score))}</span> • ${escapeHtml(app.bucket||"")}`;
-
-  const qaHost = $("qaHost");
-  qaHost.innerHTML = "";
-  (app.qa||[]).forEach(item=>{
-    const cls = item.level==="ok" ? "ok" : item.level==="warn" ? "warn" : "bad";
-    const ev = item.evidence ? highlightSnippet(item.evidence, item.q) : `<span class="muted">${t("misc.notFound")}</span>`;
-    qaHost.innerHTML += `
-      <div class="qaCard">
-        <div class="qaTop">
-          <b>${escapeHtml(item.q)}</b>
-          <span class="pill2 ${cls}">${escapeHtml(item.label)}</span>
-        </div>
-        <div class="tiny" style="margin-top:8px">${ev}</div>
-      </div>`;
-  });
-
-  const tbody = $("eviTable").querySelector("tbody");
-  tbody.innerHTML = "";
-  (app.evidence||[]).forEach(r=>{
-    const cls = r.hit ? "ok" : (r.type==="Red" ? "warn" : "bad");
-    const status = r.hit ? (r.type==="Red" ? "⚠️" : "✅") : (r.type==="Red" ? "—" : "❌");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><span class="pill2 ${r.type==="Red" ? "warn": ""}">${escapeHtml(r.type)}</span> <b>${escapeHtml(r.key)}</b></td>
-      <td><span class="pill2 ${cls}">${status}</span></td>
-      <td class="tiny">${r.hit ? highlightSnippet((r.ev||"").slice(0,240), r.key) : ""}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function pushTop3ToShortlist(){
-  const top = LAST_RANK.slice(0,3);
-  top.forEach(r=>{
-    const app = DB.applications.find(x=>x.id===r.appId);
-    if(!app) return;
-    const before = {...app};
-    app.stage = (LANG==="tr" ? "Kısa Liste" : "Shortlist");
-    app.updatedAt = nowISO();
-    logAudit("STAGE_SET","Application",app.id,before,app);
-  });
-  saveDB();
-  renderPipeline();
-}
-
-/* =========================
-   Export: Excel-friendly CSV (UTF-8 BOM + TR ; delimiter)
-========================= */
-function cellCSV(v){
-  const s = (v??"").toString().replace(/"/g,'""');
-  return `"${s}"`;
-}
-function downloadCSV(filename, header, rows){
-  const delim = (LANG==="tr") ? ";" : ",";
-  const bom = "\uFEFF";
-  const lines = [header.map(cellCSV).join(delim)]
-    .concat(rows.map(r=>r.map(cellCSV).join(delim)))
-    .join("\n");
-  const blob = new Blob([bom + lines], {type:"text/csv;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast(t("misc.exportOk"));
-}
-
-function exportShortlistCSV(){
-  const jobId = $("matchJob").value;
-  const job = DB.jobs.find(j=>j.id===jobId);
-  const shortlistStage = (LANG==="tr" ? "Kısa Liste" : "Shortlist");
-
-  const apps = DB.applications
-    .filter(a=>a.jobId===jobId && a.stage===shortlistStage)
-    .sort((a,b)=>(b.score||0)-(a.score||0));
-
-  const header = [
-    "JobTitle","CandidateName","Score","Bucket","Stage","Source","Tags",
-    "MustHit","MustCount","NiceHit","NiceCount","RedHit","Years","TopEvidence"
-  ];
-
-  const rows = apps.map(a=>{
-    const c = DB.candidates.find(x=>x.id===a.candId) || {};
-    const must = (a.evidence||[]).filter(x=>x.type==="Must");
-    const nice = (a.evidence||[]).filter(x=>x.type==="Nice");
-    const red  = (a.evidence||[]).filter(x=>x.type==="Red");
-
-    const years = extractYears((c.cvText||"") + "\n" + (c.liText||"")) ?? "";
-
-    const topEv = (a.evidence||[])
-      .filter(x=>x.hit && x.type!=="Red" && x.ev)
-      .slice(0,2)
-      .map(x=>`${x.type}:${x.key} -> ${x.ev.replace(/\s+/g," ").slice(0,140)}`)
-      .join(" | ");
-
-    return [
-      job?.title||"",
-      c.name||"",
-      a.score ?? "",
-      a.bucket||"",
-      a.stage||"",
-      c.source||"",
-      (c.tags||[]).join("|"),
-      must.filter(x=>x.hit).length, must.length,
-      nice.filter(x=>x.hit).length, nice.length,
-      red.filter(x=>x.hit).length,
-      years,
-      topEv
-    ];
-  });
-
-  downloadCSV(`shen-gen_shortlist_${(job?.title||"job").replace(/\s+/g,"_")}.csv`, header, rows);
-  logAudit("EXPORT_SHORTLIST","Job",jobId,null,{count:apps.length});
-}
-
-function exportAllRankCSV(){
-  const jobId = $("matchJob").value;
-  const job = DB.jobs.find(j=>j.id===jobId);
-  const apps = DB.applications
-    .filter(a=>a.jobId===jobId && a.score!=null)
-    .sort((a,b)=>(b.score||0)-(a.score||0));
-
-  const header = ["JobTitle","CandidateName","Score","Bucket","Stage","Source","Tags","TopEvidence"];
-  const rows = apps.map(a=>{
-    const c = DB.candidates.find(x=>x.id===a.candId) || {};
-    const topEv = (a.evidence||[])
-      .filter(x=>x.hit && x.type!=="Red" && x.ev)
-      .slice(0,2)
-      .map(x=>`${x.type}:${x.key} -> ${x.ev.replace(/\s+/g," ").slice(0,140)}`)
-      .join(" | ");
-    return [job?.title||"", c.name||"", a.score??"", a.bucket||"", a.stage||"", c.source||"", (c.tags||[]).join("|"), topEv];
-  });
-
-  downloadCSV(`shen-gen_scores_${(job?.title||"job").replace(/\s+/g,"_")}.csv`, header, rows);
-  logAudit("EXPORT_SCORES","Job",jobId,null,{count:apps.length});
-}
-
-function exportCandidatesCSV(){
-  const header = ["CandidateName","Source","Tags","CVChars","LIChars","CreatedAt"];
-  const rows = DB.candidates.map(c=>[
-    c.name||"", c.source||"", (c.tags||[]).join("|"),
-    (c.cvText||"").length, (c.liText||"").length, c.createdAt||""
-  ]);
-  downloadCSV(`shen-gen_candidates.csv`, header, rows);
-  logAudit("EXPORT_CANDIDATES","Candidates","all",null,{count:DB.candidates.length});
-}
-
-function exportJobDefinition(){
-  const jobId = $("jobSelect").value;
-  const j = DB.jobs.find(x=>x.id===jobId);
-  if(!j) return;
-  const header = ["JobTitle","Group","Location","MinYears","Must","Nice","Red","Questions"];
-  const rows = [[
-    j.title||"", j.group||"", j.location||"", j.minYears||0,
-    (j.must||[]).join(", "),
-    (j.nice||[]).join(", "),
-    (j.red||[]).join(", "),
-    (j.questions||[]).join(" | ")
-  ]];
-  downloadCSV(`shen-gen_job_${(j.title||"job").replace(/\s+/g,"_")}.csv`, header, rows);
-  logAudit("EXPORT_JOB","Job",jobId,null,{title:j.title});
-}
-
-/* =========================
-   PIPELINE
-========================= */
-function renderPipeline(){
-  const jobId = $("pipeJob").value;
-  const stages = t("pipe.stages");
-  const board = $("board");
-  board.innerHTML = "";
-
-  stages.forEach(stage=>{
-    const col = document.createElement("div");
-    col.className = "col";
-    col.dataset.stage = stage;
-    col.innerHTML = `<h4>${escapeHtml(stage)}</h4>`;
-    col.addEventListener("dragover", e=>e.preventDefault());
-    col.addEventListener("drop", (e)=>{
-      e.preventDefault();
-      const appId = e.dataTransfer.getData("text/appId");
-      const app = DB.applications.find(x=>x.id===appId);
-      if(!app) return;
-      const before = {...app};
-      app.stage = stage;
-      app.updatedAt = nowISO();
-      saveDB();
-      logAudit("STAGE_DRAGDROP","Application",app.id,before,app);
-      renderPipeline();
+      downloadCSV(rows,"adayiq_export.csv");
+      toast("İndirildi","CSV indirildi (Excel uyumlu).");
+      logAudit("CSV export alındı.");
     });
 
-    const apps = DB.applications
-      .filter(a=>a.jobId===jobId && a.stage===stage)
-      .sort((a,b)=>(b.score||0)-(a.score||0));
-
-    apps.forEach(a=>{
-      const c = DB.candidates.find(x=>x.id===a.candId);
-      const card = document.createElement("div");
-      card.className = "candCard";
-      card.draggable = true;
-      card.addEventListener("dragstart", (e)=>{ e.dataTransfer.setData("text/appId", a.id); });
-      card.innerHTML = `<b>${escapeHtml(c?.name||"")}</b>
-        <div class="candMeta">
-          <span class="pill2 ok">${escapeHtml(String(a.score ?? ""))}</span>
-          <span class="pill2 warn">${escapeHtml(a.bucket||"")}</span>
-        </div>`;
-      col.appendChild(card);
+    $("#btnSaveJob").addEventListener("click", ()=>{
+      state.job.title=$("#jobTitle").value.trim();
+      state.job.lang=$("#langMode").value;
+      state.job.must=linesToList($("#mustList").value);
+      state.job.nice=linesToList($("#niceList").value);
+      saveState();
+      toast("Pozisyon kaydedildi",`MUST: ${state.job.must.length} • NICE: ${state.job.nice.length}`);
+    });
+    $("#btnLoadDemo").addEventListener("click", ()=>{
+      $("#jobTitle").value="Kıdemli İş Analisti / PO (FinTech)";
+      $("#langMode").value="mix";
+      $("#mustList").value=["business analysis","user story","acceptance criteria","bpmn","api"].join("\n");
+      $("#niceList").value=["uml","jira","confluence","fintech","sql"].join("\n");
+      toast("Demo yüklendi","Kaydetmeyi unutma.");
+      logAudit("Demo pozisyon yüklendi.");
     });
 
-    board.appendChild(col);
-  });
-}
-
-/* =========================
-   COMPARE
-========================= */
-function renderCompareDropdowns(){
-  const jobId = $("cmpJob").value;
-  const aSel = $("cmpA"), bSel = $("cmpB");
-  aSel.innerHTML = ""; bSel.innerHTML = "";
-  const apps = DB.applications.filter(a=>a.jobId===jobId).sort((x,y)=>(y.score||0)-(x.score||0));
-
-  apps.forEach(app=>{
-    const c = DB.candidates.find(x=>x.id===app.candId);
-    const opt = document.createElement("option");
-    opt.value = app.id;
-    opt.textContent = `${c?.name||""} • ${app.score ?? ""} • ${app.stage}`;
-    aSel.appendChild(opt.cloneNode(true));
-    bSel.appendChild(opt.cloneNode(true));
-  });
-  if(apps.length){
-    aSel.value = apps[0].id;
-    bSel.value = apps[Math.min(1, apps.length-1)].id;
-  }
-}
-
-function renderQA(host, qa){
-  host.innerHTML = "";
-  (qa||[]).forEach(item=>{
-    const cls = item.level==="ok" ? "ok" : item.level==="warn" ? "warn" : "bad";
-    const ev = item.evidence ? highlightSnippet(item.evidence, item.q) : `<span class="muted">${t("misc.notFound")}</span>`;
-    host.innerHTML += `<div class="qaCard">
-      <div class="qaTop"><b>${escapeHtml(item.q)}</b><span class="pill2 ${cls}">${escapeHtml(item.label)}</span></div>
-      <div class="tiny" style="margin-top:8px">${ev}</div>
-    </div>`;
-  });
-}
-
-let LAST_COMPARE = null;
-
-function runCompare(){
-  const jobId = $("cmpJob").value;
-  const job = DB.jobs.find(j=>j.id===jobId);
-  const aId = $("cmpA").value;
-  const bId = $("cmpB").value;
-
-  const appA = DB.applications.find(x=>x.id===aId);
-  const appB = DB.applications.find(x=>x.id===bId);
-  if(!job || !appA || !appB){ $("cmpOut").textContent=t("misc.none"); return; }
-
-  const candA = DB.candidates.find(c=>c.id===appA.candId);
-  const candB = DB.candidates.find(c=>c.id===appB.candId);
-
-  const out = { jobTitle: job.title, A: candA?.name||"A", B: candB?.name||"B", scoreA: appA.score, scoreB: appB.score, winner: "" };
-
-  if(appA.score === appB.score){
-    $("cmpOut").textContent = (LANG==="tr")
-      ? "Skorlar eşit. Kanıtları ve soru cevaplarını incele."
-      : "Scores are equal. Review evidence and Q&A.";
-    out.winner = "TIE";
-  } else {
-    const win = appA.score > appB.score ? candA?.name : candB?.name;
-    $("cmpOut").innerHTML = `<span class="pill2 ok">${escapeHtml(win||"")}</span> • ${escapeHtml(String(appA.score))} vs ${escapeHtml(String(appB.score))}`;
-    out.winner = win || "";
-  }
-
-  $("cmpQaA").textContent = (candA?.name||"A");
-  $("cmpQaB").textContent = (candB?.name||"B");
-  renderQA($("cmpQaHostA"), appA.qa);
-  renderQA($("cmpQaHostB"), appB.qa);
-
-  LAST_COMPARE = {
-    type:"saved",
-    jobTitle: job.title,
-    A: candA?.name||"A",
-    B: candB?.name||"B",
-    scoreA: appA.score??"",
-    scoreB: appB.score??"",
-    winner: out.winner
-  };
-
-  logAudit("COMPARE_RUN","Job",jobId,null,{A:LAST_COMPARE.A,B:LAST_COMPARE.B});
-}
-
-function exportCompareCSV(){
-  if(!LAST_COMPARE){
-    toast("Compare sonucu yok.");
-    return;
-  }
-  const header = ["JobTitle","CandidateA","ScoreA","CandidateB","ScoreB","Winner"];
-  const rows = [[LAST_COMPARE.jobTitle, LAST_COMPARE.A, LAST_COMPARE.scoreA, LAST_COMPARE.B, LAST_COMPARE.scoreB, LAST_COMPARE.winner]];
-  downloadCSV(`shen-gen_compare_${(LAST_COMPARE.jobTitle||"job").replace(/\s+/g,"_")}.csv`, header, rows);
-  logAudit("EXPORT_COMPARE","Job","compare",null,LAST_COMPARE);
-}
-
-/* =========================
-   Quick Compare (file A/B)
-========================= */
-let QC_A = null;
-let QC_B = null;
-
-async function handleQuickFile(which, file){
-  const text = await parseFileToText(file);
-  if(!text){
-    if(which==="A") QC_A = null; else QC_B = null;
-  }else{
-    const cand = { id: uid("qc"), name: (which==="A" ? "Quick A" : "Quick B"), source:"QuickCompare", tags:[], cvText:text, liText:"" };
-    if(which==="A") QC_A = cand; else QC_B = cand;
-  }
-  syncQuickCompareState();
-}
-function syncQuickCompareState(){
-  const ready = !!(QC_A && QC_B);
-  $("runQuickCompare").disabled = !ready;
-  $("qcStatus").textContent = ready ? t("misc.quickReady") : t("misc.quickNotReady");
-}
-
-function runQuickCompare(){
-  const jobId = $("cmpJob").value;
-  const job = DB.jobs.find(j=>j.id===jobId);
-  if(!job || !QC_A || !QC_B) return;
-
-  const weights = { wMust:12, wNice:5, wYears:8, wRed:10 };
-  const scA = scorecard(job, QC_A, weights);
-  const scB = scorecard(job, QC_B, weights);
-  const qaA = buildQA(job, QC_A);
-  const qaB = buildQA(job, QC_B);
-
-  const winner = scA.score===scB.score ? "TIE" : (scA.score>scB.score ? "A" : "B");
-  $("cmpOut").innerHTML = `<span class="pill2 ok">${escapeHtml(winner)}</span> • ${scA.score} vs ${scB.score} (Quick)`;
-  $("cmpQaA").textContent = "Quick A";
-  $("cmpQaB").textContent = "Quick B";
-  renderQA($("cmpQaHostA"), qaA);
-  renderQA($("cmpQaHostB"), qaB);
-
-  LAST_COMPARE = { type:"quick", jobTitle: job.title, A:"Quick A", B:"Quick B", scoreA: scA.score, scoreB: scB.score, winner };
-  logAudit("QUICK_COMPARE_RUN","Job",jobId,null,LAST_COMPARE);
-}
-
-/* =========================
-   AUDIT
-========================= */
-function renderAudit(){
-  const host = $("auditList");
-  if(!DB.audit.length){ host.textContent = t("misc.none"); return; }
-  host.innerHTML = DB.audit.slice(0,120).map(e=>{
-    return `<div class="candCard">
-      <b>${escapeHtml(e.action)}</b>
-      <div class="tiny">${escapeHtml(e.ts)} • ${escapeHtml(e.entityType)}:${escapeHtml(e.entityId)}</div>
-    </div>`;
-  }).join("");
-}
-
-/* =========================
-   Actions: Jobs/Candidates
-========================= */
-function saveJob(){
-  const job = {
-    id: uid("job"),
-    title: $("jobTitle").value.trim() || (LANG==="tr" ? "Yeni Pozisyon" : "New Job"),
-    group: $("jobGroup").value,
-    location: $("jobLoc").value.trim(),
-    must: csvToList($("jobMust").value),
-    nice: csvToList($("jobNice").value),
-    red: csvToList($("jobRed").value),
-    minYears: Number($("jobMinYears").value || 0),
-    questions: ($("jobQs").value||"").split("\n").map(x=>x.trim()).filter(Boolean),
-    createdAt: nowISO()
-  };
-  DB.jobs.push(job);
-  saveDB();
-  logAudit("JOB_CREATE","Job",job.id,null,job);
-  renderJobs();
-  $("jobSelect").value = job.id;
-  renderJobDetail();
-}
-
-function deleteJob(){
-  const id = $("jobSelect").value;
-  const job = DB.jobs.find(j=>j.id===id);
-  if(!job) return;
-  DB.jobs = DB.jobs.filter(j=>j.id!==id);
-  DB.applications = DB.applications.filter(a=>a.jobId!==id);
-  saveDB();
-  logAudit("JOB_DELETE","Job",id,job,null);
-  renderJobs(); renderCandidates();
-}
-
-function cloneJob(){
-  const id = $("jobSelect").value;
-  const job = DB.jobs.find(j=>j.id===id);
-  if(!job) return;
-  const copy = {...job, id:uid("job"), title: job.title + (LANG==="tr" ? " (kopya)" : " (copy)"), createdAt:nowISO()};
-  DB.jobs.push(copy);
-  saveDB();
-  logAudit("JOB_CLONE","Job",copy.id,null,copy);
-  renderJobs();
-  $("jobSelect").value = copy.id;
-  renderJobDetail();
-}
-
-function jobTemplate(){
-  // sample (kept)
-  $("jobTitle").value = (LANG==="tr") ? "Kıdemli İş Analisti" : "Senior Business Analyst";
-  $("jobGroup").value = "product";
-  $("jobLoc").value = (LANG==="tr") ? "İstanbul / Uzaktan" : "Istanbul / Remote";
-  $("jobMust").value = "business analysis, user story, acceptance criteria, BPMN, API, SQL, stakeholder";
-  $("jobNice").value = "Jira, Confluence, Postman, microservices, KYC, AML";
-  $("jobRed").value = (LANG==="tr") ? "sahte, intihal, alakasız" : "fake, plagiarism, unrelated";
-  $("jobMinYears").value = 5;
-  $("jobQs").value =
-(LANG==="tr")
-? `Liderlik / ekip yönetimi kanıtı var mı?
-API entegrasyon tecrübesi var mı?
-KYC/AML/MASAK benzeri tecrübe var mı?
-Jira/Confluence gibi araçlar geçmiş mi?`
-: `Is there evidence of leadership/team management?
-Any API integration experience?
-Any KYC/AML compliance experience?
-Mentions tools like Jira/Confluence?`;
-}
-
-function resetJob(){
-  ["jobTitle","jobLoc","jobMust","jobNice","jobRed","jobMinYears","jobQs"].forEach(id=>$(id).value="");
-  $("jobGroup").value="auto";
-  $("roleTpl").value="";
-}
-
-function saveCandidate(){
-  const cand = {
-    id: uid("cand"),
-    name: $("candName").value.trim() || (LANG==="tr" ? "İsimsiz Aday" : "Unnamed"),
-    source: $("candSource").value.trim(),
-    tags: csvToList($("candTags").value),
-    cvText: $("candCV").value || "",
-    liText: $("candLI").value || "",
-    createdAt: nowISO()
-  };
-  DB.candidates.push(cand);
-  saveDB();
-  logAudit("CAND_CREATE","Candidate",cand.id,null,cand);
-  renderCandidates();
-  $("candSelect").value = cand.id;
-  renderCandDetail();
-}
-
-function deleteCandidate(){
-  const id = $("candSelect").value;
-  const cand = DB.candidates.find(c=>c.id===id);
-  if(!cand) return;
-  DB.candidates = DB.candidates.filter(c=>c.id!==id);
-  DB.applications = DB.applications.filter(a=>a.candId!==id);
-  saveDB();
-  logAudit("CAND_DELETE","Candidate",id,cand,null);
-  renderCandidates(); renderJobs();
-}
-
-function resetCandidate(){
-  ["candName","candSource","candTags","candCV","candLI"].forEach(id=>$(id).value="");
-  $("cvFile").value = "";
-  $("liFile").value = "";
-}
-
-function clearAudit(){
-  DB.audit = [];
-  saveDB();
-  renderAudit();
-}
-function clearAll(){
-  localStorage.removeItem(KEY);
-  DB = loadDB();
-  renderAll();
-}
-
-/* =========================
-   Tabs
-========================= */
-function showTab(name){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-  document.querySelector(`.tab[data-tab="${name}"]`)?.classList.add("active");
-  document.getElementById("page-"+name).style.display = "block";
-
-  if(name==="jobs") renderJobDetail();
-  if(name==="candidates") renderCandDetail();
-  if(name==="pipeline") renderPipeline();
-  if(name==="compare") renderCompareDropdowns();
-  if(name==="audit") renderAudit();
-}
-
-/* =========================
-   Guide
-========================= */
-function openGuide(){ $("overlay").style.display = "flex"; }
-function closeGuide(){ $("overlay").style.display = "none"; DB.ui.guideSeen = true; saveDB(); }
-
-/* =========================
-   Initial / renderAll
-========================= */
-function syncBanner(){
-  $("banner").style.display = DB.ui.bannerHidden ? "none" : "flex";
-}
-
-function renderAll(){
-  applyLang();
-  renderJobs();
-  renderCandidates();
-  renderAudit();
-
-  // sync selects
-  $("matchJob").innerHTML = $("jobSelect").innerHTML;
-  $("pipeJob").innerHTML = $("jobSelect").innerHTML;
-  $("cmpJob").innerHTML = $("jobSelect").innerHTML;
-
-  if($("jobSelect").value){
-    $("matchJob").value = $("jobSelect").value;
-    $("pipeJob").value = $("jobSelect").value;
-    $("cmpJob").value = $("jobSelect").value;
-  }
-  renderPipeline();
-  renderCompareDropdowns();
-  syncBanner();
-
-  syncQuickCompareState();
-}
-
-/* =========================
-   Wiring
-========================= */
-document.querySelectorAll(".tab").forEach(el=>{
-  el.addEventListener("click", ()=>showTab(el.dataset.tab));
-});
-
-$("lang").addEventListener("change", (e)=>{
-  LANG = e.target.value;
-
-  // Dil değişiminde stage metinlerini normalize et (TR/EN kaymasını engeller)
-  const mapStage = (s)=>{
-    const tr = ["Yeni","Ön Eleme","Kısa Liste","Mülakat","Teklif","Reddedildi"];
-    const en = ["New","Screened","Shortlist","Interview","Offer","Rejected"];
-    const iTR = tr.indexOf(s);
-    const iEN = en.indexOf(s);
-    const idx = (iTR!==-1) ? iTR : (iEN!==-1 ? iEN : -1);
-    if(idx===-1) return s;
-    return (LANG==="tr") ? tr[idx] : en[idx];
-  };
-
-  DB.applications = (DB.applications||[]).map(a=>({ ...a, stage: mapStage(a.stage) }));
-  saveDB();
-
-  renderAll();
-});
-
-
-/* =========================
-   Wiring (devam)
-========================= */
-
-// role template dropdown/search
-$("roleSearch").addEventListener("input", (e)=>{
-  populateRoleTemplates(e.target.value || "");
-});
-$("roleTpl").addEventListener("change", (e)=>{
-  applyRoleTemplate(e.target.value);
-});
-
-// Jobs buttons
-$("saveJob").addEventListener("click", saveJob);
-$("resetJob").addEventListener("click", resetJob);
-$("jobTemplate").addEventListener("click", jobTemplate);
-$("deleteJob").addEventListener("click", deleteJob);
-$("cloneJob").addEventListener("click", cloneJob);
-$("exportJobDef").addEventListener("click", exportJobDefinition);
-$("jobSelect").addEventListener("change", renderJobDetail);
-
-// Candidates filters/search
-$("candSearch").addEventListener("input", renderCandidates);
-$("candFilter").addEventListener("change", renderCandidates);
-$("candSelect").addEventListener("change", renderCandDetail);
-
-// Candidate buttons
-$("saveCand").addEventListener("click", saveCandidate);
-$("resetCand").addEventListener("click", resetCandidate);
-$("deleteCand").addEventListener("click", deleteCandidate);
-$("exportCandidates").addEventListener("click", exportCandidatesCSV);
-
-// CV upload handlers (PDF/DOCX/TXT)
-$("cvFile").addEventListener("change", async (e)=>{
-  const file = e.target.files?.[0];
-  if(!file) return;
-  const text = await parseFileToText(file);
-  if(text) $("candCV").value = text;
-});
-
-$("liFile").addEventListener("change", async (e)=>{
-  const file = e.target.files?.[0];
-  if(!file) return;
-  const text = await parseFileToText(file);
-  if(text) $("candLI").value = text;
-});
-
-// Match
-$("runMatch").addEventListener("click", ()=>{
-  runMatching();
-  // Match sonrası pipeline/compare dropdownları da güncel kalsın
-  renderPipeline();
-  renderCompareDropdowns();
-});
-
-$("rankSearch").addEventListener("input", renderRanking);
-$("rankFilter").addEventListener("change", renderRanking);
-
-$("ranking").addEventListener("click", (e)=>{
-  const card = e.target.closest(".candCard");
-  if(!card) return;
-  const appId = card.dataset.app;
-  if(!appId) return;
-  $("appSelect").value = appId;
-  renderAppDetail();
-});
-
-$("appSelect").addEventListener("change", renderAppDetail);
-$("pushShortlist").addEventListener("click", pushTop3ToShortlist);
-$("exportShortlist").addEventListener("click", exportShortlistCSV);
-$("exportAllRank").addEventListener("click", exportAllRankCSV);
-
-// Pipeline
-$("pipeJob").addEventListener("change", renderPipeline);
-
-// Compare
-$("cmpJob").addEventListener("change", ()=>{
-  renderCompareDropdowns();
-  // compare ekranında da quick compare state korunur
-});
-$("runCompare").addEventListener("click", runCompare);
-$("exportCompare").addEventListener("click", exportCompareCSV);
-
-// Quick Compare file wiring
-$("qcAFile").addEventListener("change", async (e)=>{
-  const file = e.target.files?.[0];
-  if(!file) return;
-  await handleQuickFile("A", file);
-});
-$("qcBFile").addEventListener("change", async (e)=>{
-  const file = e.target.files?.[0];
-  if(!file) return;
-  await handleQuickFile("B", file);
-});
-$("runQuickCompare").addEventListener("click", runQuickCompare);
-
-// Audit
-$("clearAudit").addEventListener("click", clearAudit);
-$("clearAll").addEventListener("click", clearAll);
-
-// Guide modal
-$("openGuide").addEventListener("click", openGuide);
-$("closeGuide").addEventListener("click", closeGuide);
-$("overlay").addEventListener("click", (e)=>{
-  if(e.target.id === "overlay") closeGuide();
-});
-
-// Banner hide
-$("hideBanner").addEventListener("click", ()=>{
-  DB.ui.bannerHidden = true;
-  saveDB();
-  syncBanner();
-});
-
-// Guide buttons
-$("demoFill").addEventListener("click", ()=>{
-  // Demo: 1 job + 2 candidate + run match
-  // 1) job
-  resetJob();
-  jobTemplate();
-  saveJob();
-
-  // 2) candidates
-  resetCandidate();
-  $("candName").value = (LANG==="tr") ? "Aday 1 (Demo)" : "Candidate 1 (Demo)";
-  $("candSource").value = "LinkedIn";
-  $("candTags").value = (LANG==="tr") ? "Senior, FinTech, Remote" : "Senior, FinTech, Remote";
-  $("candCV").value =
-`Senior Business Analyst with 6 years experience.
-Skills: SQL, API, BPMN, Agile, Jira, Confluence, Postman.
-Worked on KYC/AML flows, integration projects, acceptance criteria, user stories.`;
-  saveCandidate();
-
-  resetCandidate();
-  $("candName").value = (LANG==="tr") ? "Aday 2 (Demo)" : "Candidate 2 (Demo)";
-  $("candSource").value = "Referral";
-  $("candTags").value = (LANG==="tr") ? "Mid, Banking" : "Mid, Banking";
-  $("candCV").value =
-`Business Analyst with 3 years experience.
-Worked on requirement gathering, documentation, Jira.
-Some SQL knowledge, basic API exposure.`;
-  saveCandidate();
-
-  // go match
-  showTab("match");
-  // run
-  setTimeout(()=>{ runMatching(); }, 50);
-});
-
-$("goMatch").addEventListener("click", ()=>showTab("match"));
-
-/* =========================
-   Small fixes: keep selects in sync
-========================= */
-$("matchJob").addEventListener("change", ()=>{
-  // when job changes in Match, rebuild ranking selection
-  LAST_RANK = [];
-  $("ranking").innerHTML = "";
-  $("rankCount").textContent = "0";
-  $("rankEmpty").style.display = "block";
-  $("appSelect").innerHTML = "";
-  $("qaHost").innerHTML = "";
-  $("eviTable").querySelector("tbody").innerHTML = `<tr><td colspan="3" class="muted">${t("misc.none")}</td></tr>`;
-  renderCompareDropdowns();
-  renderPipeline();
-});
-
-/* =========================
-   Boot
-========================= */
-(function init(){
-  // banner state
-  if(DB.ui?.bannerHidden == null) DB.ui.bannerHidden = false;
-
-  // defaults for language selector
-  $("lang").value = LANG;
-
-  // preset dropdown initial fill
-  populateRoleTemplates("");
-
-  // first render
-  renderAll();
-
-  // if first time, show guide (optional)
-  if(!DB.ui.guideSeen){
-    // openGuide(); // istersen otomatik açtırabiliriz
-  }
-})();
-</script>
-
+    $("#candSource").addEventListener("blur", ()=>{
+      const guess=nameFromLinkedInUrl($("#candSource").value);
+      if(!$("#candName").value.trim() && guess){
+        $("#candName").value=guess;
+        toast("Ad tahmini","LinkedIn URL’den ad-soyad dolduruldu.");
+        logAudit("LinkedIn URL’den ad tahmini: "+guess);
+      }
+    });
+
+    $("#cvFile").addEventListener("change", async (e)=>{
+      const file=e.target.files?.[0]; if(!file) return;
+      await handleFileInto($("#cvText"), $("#cvFileInfo"), file);
+      $("#cvFile").value="";
+    });
+    $("#lnFile").addEventListener("change", async (e)=>{
+      const file=e.target.files?.[0]; if(!file) return;
+      await handleFileInto($("#lnText"), $("#lnFileInfo"), file);
+      $("#lnFile").value="";
+    });
+
+    $("#btnClearForm").addEventListener("click", ()=>{
+      state.selectedCandidateId=null;
+      $("#candName").value=""; $("#candSource").value=""; $("#candTags").value="";
+      $("#cvText").value=""; $("#lnText").value="";
+      $("#cvFileInfo").innerHTML=`<span class="dot"></span> Dosya seçilmedi`;
+      $("#lnFileInfo").innerHTML=`<span class="dot"></span> Dosya seçilmedi`;
+      $("#btnDeleteCandidate").disabled=true;
+      renderCandidateList();
+      toast("Form temizlendi","Yeni aday ekleyebilirsin.");
+      logAudit("Aday formu temizlendi.");
+    });
+
+    $("#btnAddCandidate").addEventListener("click", ()=>{
+      const name=$("#candName").value.trim();
+      const source=$("#candSource").value.trim();
+      const tags=$("#candTags").value.trim();
+      const cvText=$("#cvText").value.trim();
+      const lnText=$("#lnText").value.trim();
+      if(!name && !source && !cvText && !lnText){ toast("Eksik bilgi","En azından ad veya CV metni ekle."); return; }
+
+      const id = state.selectedCandidateId || crypto.randomUUID();
+      const existing = state.candidates.find(x=>x.id===id);
+      const payload = {
+        id,
+        name: name || nameFromLinkedInUrl(source) || "İsimsiz Aday",
+        source,tags,cvText,lnText,
+        cvFileName: ($("#cvFileInfo").textContent.includes("Dosya:") ? $("#cvFileInfo").textContent.replace("Dosya:","").trim() : ""),
+        lnFileName: ($("#lnFileInfo").textContent.includes("Dosya:") ? $("#lnFileInfo").textContent.replace("Dosya:","").trim() : ""),
+        createdAt: existing?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      if(existing){ Object.assign(existing,payload); toast("Aday güncellendi",payload.name); logAudit("Aday güncellendi: "+payload.name); }
+      else{ state.candidates.push(payload); toast("Aday eklendi",payload.name); logAudit("Aday eklendi: "+payload.name); }
+      saveState();
+      renderCandidateList();
+      renderCompareSelects();
+    });
+
+    $("#btnDeleteCandidate").addEventListener("click", ()=>{
+      const id=state.selectedCandidateId; if(!id) return;
+      const c=state.candidates.find(x=>x.id===id);
+      state.candidates = state.candidates.filter(x=>x.id!==id);
+      state.selectedCandidateId=null;
+      saveState();
+      $("#btnClearForm").click();
+      toast("Aday silindi", c?.name||"İsimsiz Aday");
+      logAudit("Aday silindi: "+(c?.name||"İsimsiz"));
+    });
+
+    $("#candSearch").addEventListener("input", renderCandidateList);
+    $("#btnFilterAll").addEventListener("click", ()=>{ $("#candSearch").value=""; renderCandidateList(); });
+
+    $("#btnRunMatch").addEventListener("click", ()=>{
+      if(!state.job.must?.length && !state.job.nice?.length){ toast("Pozisyon eksik","Önce kriterleri kaydet."); return; }
+      renderRank(); toast("Sıralama hazır","Sağdan aday seçip kanıtları gör.");
+    });
+    $("#rankSearch").addEventListener("input", renderRank);
+    $("#rankFilter").addEventListener("change", renderRank);
+
+    $("#btnCompare").addEventListener("click", runCompare);
+
+    // Init
+    loadState();
+    $("#jobTitle").value = state.job.title || "";
+    $("#langMode").value = state.job.lang || "tr";
+    $("#mustList").value = (state.job.must||[]).join("\n");
+    $("#niceList").value = (state.job.nice||[]).join("\n");
+    renderCandidateList();
+    renderCompareSelects();
+    logAudit("AdayIQ Pro başlatıldı.");
+  </script>
 </body>
 </html>
-
