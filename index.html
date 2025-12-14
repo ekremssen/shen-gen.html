@@ -7,15 +7,19 @@
   <style>
     :root{
       --bg:#060a18; --text:#eaf0ff; --muted:#9fb0e6; --line:rgba(255,255,255,.12);
-      --card:rgba(255,255,255,.03); --card2:rgba(10,14,30,.40);
+      --card:rgba(255,255,255,.04); --card2:rgba(10,14,30,.55);
       --ok:#26d07c; --warn:#ffcc00; --bad:#ff5a5f; --accent:#6ea8ff;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
+      --r:18px;
     }
     *{box-sizing:border-box}
     body{
       margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(110,168,255,.25), transparent 55%),
-                  radial-gradient(900px 500px at 90% 10%, rgba(38,208,124,.18), transparent 55%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(110,168,255,.28), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(38,208,124,.20), transparent 55%),
+        radial-gradient(700px 600px at 60% 110%, rgba(255,204,0,.09), transparent 55%),
+        var(--bg);
       color:var(--text);
     }
     header{
@@ -26,8 +30,7 @@
     .wrap{max-width:1280px; margin:0 auto; padding:14px 16px}
     .top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
     .brand{display:flex; align-items:center; gap:12px}
-    .logo{width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, rgba(110,168,255,.95), rgba(38,208,124,.92)); box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    h1{margin:0; font-size:22px; letter-spacing:.4px; text-transform:lowercase}
+    .brand h1{margin:0; font-size:22px; letter-spacing:.3px; text-transform:lowercase}
     .tag{display:block; margin-top:2px; font-size:12px; color:var(--muted)}
     .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
       border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03); font-size:12px; color:var(--muted)}
@@ -35,30 +38,39 @@
     select, input, textarea, button{font:inherit}
     main{max-width:1280px; margin:0 auto; padding:16px}
     .tabs{display:flex; flex-wrap:wrap; gap:8px}
-    .tab{padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
-      cursor:pointer; font-weight:800; color:var(--muted)}
+    .tab{padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03); cursor:pointer; font-weight:900; color:var(--muted)}
     .tab.active{background: rgba(110,168,255,.18); border-color: rgba(110,168,255,.45); color:var(--text)}
     .grid{display:grid; gap:12px; grid-template-columns:1fr 1fr}
     @media (max-width:1100px){.grid{grid-template-columns:1fr}}
-    .card{border-radius:16px; border:1px solid var(--line); background: linear-gradient(180deg, var(--card), rgba(255,255,255,.01));
-      padding:14px; box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .card{
+      border-radius:var(--r); border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      padding:14px; box-shadow: var(--shadow);
+    }
     .card h2{margin:0 0 10px; font-size:14px; color:#dfe6ff}
     label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
     input, textarea, select{
-      width:100%; border-radius:12px; border:1px solid var(--line); background: var(--card2); color:var(--text);
+      width:100%; border-radius:14px; border:1px solid var(--line); background: var(--card2); color:var(--text);
       padding:10px 12px; outline:none;
     }
     textarea{min-height:92px; resize:vertical; line-height:1.35}
     .row{display:grid; gap:10px; grid-template-columns:1fr 1fr}
     @media (max-width:720px){.row{grid-template-columns:1fr}}
     .btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
-    button{border:0; border-radius:12px; padding:10px 12px; cursor:pointer; font-weight:900;
-      background: rgba(110,168,255,.18); color:var(--text); border:1px solid rgba(110,168,255,.35)}
-    button.primary{background: linear-gradient(135deg, rgba(110,168,255,.95), rgba(110,168,255,.55)); border-color: rgba(110,168,255,.55); color:#071022}
+    button{
+      border:0; border-radius:14px; padding:10px 12px; cursor:pointer; font-weight:900;
+      background: rgba(110,168,255,.18); color:var(--text); border:1px solid rgba(110,168,255,.35)
+    }
+    button.primary{
+      background: linear-gradient(135deg, rgba(110,168,255,.95), rgba(38,208,124,.55));
+      border-color: rgba(110,168,255,.55); color:#071022;
+    }
     button.ghost{background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.12)}
-    .muted{color:var(--muted); font-size:12px; line-height:1.4}
+    button.danger{background: rgba(255,90,95,.12); border-color: rgba(255,90,95,.30)}
+    .muted{color:var(--muted); font-size:12px; line-height:1.45}
     .hr{height:1px; background: rgba(255,255,255,.08); margin:12px 0}
-    .list{border:1px solid var(--line); background: rgba(10,14,30,.35); border-radius:16px; padding:12px}
+    .list{border:1px solid var(--line); background: rgba(10,14,30,.35); border-radius:var(--r); padding:12px}
     .list h3{margin:0 0 8px; font-size:13px; color:#dfe6ff}
     .table{width:100%; border-collapse:collapse; font-size:12px; overflow:hidden; border-radius:14px; border:1px solid var(--line)}
     .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08); padding:10px; text-align:left; vertical-align:top}
@@ -66,57 +78,121 @@
     .table tr:last-child td{border-bottom:0}
     .pill2{display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.15);
       background: rgba(255,255,255,.04); font-size:11px}
-    .pill2.ok{border-color:rgba(38,208,124,.45)}
-    .pill2.warn{border-color:rgba(255,204,0,.45)}
-    .pill2.bad{border-color:rgba(255,90,95,.45)}
+    .pill2.ok{border-color:rgba(38,208,124,.55)}
+    .pill2.warn{border-color:rgba(255,204,0,.55)}
+    .pill2.bad{border-color:rgba(255,90,95,.55)}
     .hl{background: rgba(255,204,0,.22); padding:0 2px; border-radius:4px}
-    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
-    .chip{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.14); background: rgba(110,168,255,.14); font-size:12px}
-    .chip button{padding:0; border:0; background:transparent; color:var(--text); cursor:pointer; font-weight:900}
     .board{display:grid; gap:10px; grid-template-columns:repeat(6, 1fr)}
     @media (max-width:1200px){.board{grid-template-columns:repeat(3, 1fr)}}
     @media (max-width:720px){.board{grid-template-columns:1fr}}
-    .col{border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.02); border-radius:16px; padding:10px; min-height:240px}
+    .col{border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.02);
+      border-radius:var(--r); padding:10px; min-height:240px}
     .col h4{margin:0 0 8px; font-size:12px; color:#dfe6ff}
-    .candCard{border:1px solid rgba(255,255,255,.12); background: rgba(10,14,30,.35); border-radius:14px; padding:10px; margin-top:8px; cursor:grab}
+    .candCard{
+      border:1px solid rgba(255,255,255,.12); background: rgba(10,14,30,.35);
+      border-radius:14px; padding:10px; margin-top:8px; cursor:grab
+    }
     .candCard b{display:block; font-size:12px}
     .candMeta{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
-    .score{font-weight:900}
+    .score{font-weight:1000}
     .qaGrid{display:grid; gap:10px}
     .qaCard{border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.02); border-radius:14px; padding:10px}
     .qaTop{display:flex; justify-content:space-between; gap:10px; align-items:center}
     .tiny{font-size:11px; color:var(--muted)}
     .footer{max-width:1280px; margin:0 auto; padding:0 16px 20px; color:var(--muted); font-size:11px}
+
+    /* top help banner */
+    .banner{
+      margin-top:12px;
+      border:1px solid rgba(110,168,255,.30);
+      background: linear-gradient(135deg, rgba(110,168,255,.16), rgba(38,208,124,.08));
+      border-radius:16px;
+      padding:10px 12px;
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;
+    }
+    .banner b{display:block}
+    .banner .actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .kbd{font-size:11px; padding:3px 7px; border:1px solid rgba(255,255,255,.14); border-radius:10px; background:rgba(255,255,255,.03); color:var(--muted)}
+
+    /* modal */
+    .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:16px; z-index:50}
+    .modal{
+      width:min(860px, 100%); border-radius:22px; border:1px solid rgba(255,255,255,.14);
+      background: rgba(6,10,24,.92); backdrop-filter: blur(10px); box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .modal h2{margin:0 0 6px; font-size:16px}
+    .modal .grid2{display:grid; grid-template-columns:1.2fr .8fr; gap:12px}
+    @media (max-width:900px){.modal .grid2{grid-template-columns:1fr}}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03); border-radius:16px; padding:12px}
+    .step b{display:block; margin-bottom:6px}
+    .closeX{float:right; cursor:pointer; padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); color:var(--text); font-weight:900}
   </style>
 </head>
 <body>
+
 <header>
   <div class="wrap">
     <div class="top">
       <div class="brand">
-        <div class="logo"></div>
+        <!-- ✅ Yeni ilgi çekici shen-gen avatar (SVG, dosyasız) -->
+        <svg width="46" height="46" viewBox="0 0 100 100" aria-label="shen-gen avatar" role="img" style="filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); border-radius:18px">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="rgba(110,168,255,1)"/>
+              <stop offset="1" stop-color="rgba(38,208,124,1)"/>
+            </linearGradient>
+            <radialGradient id="g2" cx="40%" cy="30%" r="70%">
+              <stop offset="0" stop-color="rgba(255,255,255,.18)"/>
+              <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+            </radialGradient>
+          </defs>
+          <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#g1)"/>
+          <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#g2)"/>
+          <circle cx="50" cy="50" r="38" fill="rgba(6,10,24,.35)" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+          <path d="M33 60c4 9 13 14 24 14 10 0 19-4 23-11 5-9-3-16-15-18l-7-1c-7-1-10-4-9-8 1-5 7-8 14-8 6 0 12 2 16 6"
+                fill="none" stroke="rgba(255,255,255,.92)" stroke-width="6" stroke-linecap="round"/>
+          <text x="50" y="57" text-anchor="middle" font-size="26" font-weight="900" fill="rgba(255,255,255,.95)" style="letter-spacing:.5px">SG</text>
+        </svg>
+
         <div>
           <h1>shen-gen</h1>
-          <span class="tag" id="tagline">Mini ATS • Kanıtlı Screening • Pipeline • Compare • TR/EN</span>
+          <span class="tag" id="tagline">Mini ATS • Kanıtlı Ön Eleme • Pipeline • Karşılaştır • TR/EN</span>
         </div>
       </div>
+
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
         <span class="pill"><span id="modeLbl">Mod</span>: <b id="modeVal">Deterministik</b></span>
         <span class="pill"><span id="outLbl">Çıktı</span>: <b id="outVal">Kanıtlı</b></span>
-        <select id="lang" style="max-width:160px">
+        <button class="ghost" id="openGuide">❓ <span id="helpBtnTxt">Nasıl Kullanılır</span></button>
+        <select id="lang" style="max-width:170px">
           <option value="tr">Türkçe</option>
           <option value="en">English</option>
         </select>
       </div>
     </div>
+
+    <!-- ✅ Kullanıcı yönlendirme banner (her ekranda görünür) -->
+    <div class="banner" id="banner">
+      <div>
+        <b id="bannerTitle">Hızlı Başlangıç</b>
+        <div class="muted" id="bannerText">
+          1) Pozisyon oluştur → 2) Aday ekle → 3) “Eşleştir & Sırala” ile skor + kanıt gör → 4) Kısa liste + karşılaştır.
+        </div>
+      </div>
+      <div class="actions">
+        <span class="kbd">Jobs</span><span class="kbd">Candidates</span><span class="kbd">Match</span>
+        <button class="ghost" id="hideBanner">✕ <span id="hideBannerTxt">Gizle</span></button>
+      </div>
+    </div>
+
     <div class="tabs" style="margin-top:12px">
-      <div class="tab active" data-tab="jobs" id="tabJobs">Jobs</div>
-      <div class="tab" data-tab="candidates" id="tabCand">Candidates</div>
-      <div class="tab" data-tab="match" id="tabMatch">Match & Rank</div>
-      <div class="tab" data-tab="pipeline" id="tabPipe">Pipeline</div>
-      <div class="tab" data-tab="compare" id="tabCompare">Compare</div>
-      <div class="tab" data-tab="audit" id="tabAudit">Audit</div>
+      <div class="tab active" data-tab="jobs" id="tabJobs">Pozisyonlar</div>
+      <div class="tab" data-tab="candidates" id="tabCand">Adaylar</div>
+      <div class="tab" data-tab="match" id="tabMatch">Eşleştir & Sırala</div>
+      <div class="tab" data-tab="pipeline" id="tabPipe">Süreç</div>
+      <div class="tab" data-tab="compare" id="tabCompare">Karşılaştır</div>
+      <div class="tab" data-tab="audit" id="tabAudit">Kayıt</div>
     </div>
   </div>
 </header>
@@ -126,75 +202,77 @@
   <section class="page" id="page-jobs">
     <div class="grid">
       <div class="card">
-        <h2 id="jobCreateTitle">Job Create</h2>
-        <label id="jobTitleLbl">Job title</label>
-        <input id="jobTitle" placeholder="Örn: Senior Business Analyst"/>
+        <h2 id="jobCreateTitle">Pozisyon Oluştur</h2>
+
+        <div class="muted" id="jobIntro">
+          Bu ekranda aradığın rolü tanımlarsın. Sonra aday ekleyip sistemin kanıtlı taramasını çalıştırırsın.
+        </div>
+
+        <label id="jobTitleLbl">Pozisyon Adı</label>
+        <input id="jobTitle"/>
 
         <div class="row">
           <div>
-            <label id="jobGroupLbl">Job group</label>
+            <label id="jobGroupLbl">Pozisyon Grubu</label>
             <select id="jobGroup">
-              <option value="auto">Auto</option>
-              <option value="tech">Tech</option>
-              <option value="product">Product/BA/PO</option>
-              <option value="sales">Sales</option>
-              <option value="finance">Finance</option>
-              <option value="ops">Ops</option>
+              <option value="auto" id="grpAuto">Otomatik</option>
+              <option value="tech">Teknoloji</option>
+              <option value="product">Ürün / İş Analizi / PO</option>
+              <option value="sales">Satış</option>
+              <option value="finance">Finans</option>
+              <option value="ops">Operasyon</option>
             </select>
           </div>
           <div>
-            <label id="jobLocLbl">Location (optional)</label>
-            <input id="jobLoc" placeholder="İstanbul / Remote"/>
+            <label id="jobLocLbl">Lokasyon (opsiyonel)</label>
+            <input id="jobLoc"/>
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label id="mustLbl">Must-have (comma)</label>
-            <input id="jobMust" placeholder="SQL, API, Agile, BPMN"/>
+            <label id="mustLbl">Olmazsa Olmazlar (virgülle)</label>
+            <input id="jobMust"/>
+            <div class="tiny" id="mustHint">Örn: SQL, API, Agile, BPMN</div>
           </div>
           <div>
-            <label id="niceLbl">Nice-to-have (comma)</label>
-            <input id="jobNice" placeholder="Jira, Confluence, Postman"/>
+            <label id="niceLbl">Artı Değerler (virgülle)</label>
+            <input id="jobNice"/>
+            <div class="tiny" id="niceHint">Örn: Jira, Confluence, Postman</div>
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label id="redLbl">Red flags (comma)</label>
-            <input id="jobRed" placeholder="fake, plagiarism"/>
+            <label id="redLbl">Kırmızı Bayraklar (virgülle)</label>
+            <input id="jobRed"/>
+            <div class="tiny" id="redHint">Örn: sahte, intihal</div>
           </div>
           <div>
-            <label id="minYearsLbl">Min years</label>
-            <input id="jobMinYears" type="number" min="0" step="1" placeholder="5"/>
+            <label id="minYearsLbl">Minimum Deneyim (yıl)</label>
+            <input id="jobMinYears" type="number" min="0" step="1"/>
           </div>
         </div>
 
-        <label id="qSetLbl">Question set (one per line)</label>
-        <textarea id="jobQs" placeholder="Liderlik kanıtı var mı?
-API entegrasyon tecrübesi var mı?
-KYC/AML deneyimi var mı?"></textarea>
+        <label id="qSetLbl">Soru Seti (her satıra 1 soru)</label>
+        <textarea id="jobQs"></textarea>
+        <div class="tiny" id="qHint">Sistem her soruya “Kanıtlı / Muhtemel / Bulunamadı” üretir (kanıt snippet’iyle).</div>
 
         <div class="btns">
-          <button class="primary" id="saveJob">Save Job</button>
-          <button class="ghost" id="jobTemplate">Template</button>
-          <button class="ghost" id="resetJob">Reset</button>
-        </div>
-
-        <div class="hr"></div>
-        <div class="muted" id="jobNote">
-          Not: Boolean alışkanlığı olan recruiter’lar için kriterler “comma” ile giriliyor; istersen sonraki sürümde UI Boolean Builder ekleriz. :contentReference[oaicite:4]{index=4}
+          <button class="primary" id="saveJob">Pozisyonu Kaydet</button>
+          <button class="ghost" id="jobTemplate">Şablon</button>
+          <button class="ghost" id="resetJob">Temizle</button>
         </div>
       </div>
 
       <div class="card">
-        <h2 id="jobListTitle">Jobs</h2>
+        <h2 id="jobListTitle">Pozisyonlar</h2>
         <div class="list">
-          <h3 id="jobSelectLbl">Select job</h3>
+          <h3 id="jobSelectLbl">Pozisyon Seç</h3>
           <select id="jobSelect"></select>
           <div class="btns">
-            <button class="ghost" id="deleteJob">Delete</button>
-            <button class="ghost" id="cloneJob">Clone</button>
+            <button class="danger" id="deleteJob">Sil</button>
+            <button class="ghost" id="cloneJob">Kopyala</button>
           </div>
           <div class="hr"></div>
           <div class="muted" id="jobDetail">—</div>
@@ -207,45 +285,54 @@ KYC/AML deneyimi var mı?"></textarea>
   <section class="page" id="page-candidates" style="display:none">
     <div class="grid">
       <div class="card">
-        <h2 id="candCreateTitle">Candidate Create</h2>
-        <label id="candNameLbl">Full name</label>
-        <input id="candName" placeholder="Aday adı"/>
+        <h2 id="candCreateTitle">Aday Ekle</h2>
+
+        <div class="muted" id="candIntro">
+          CV’yi metin olarak yapıştırabilir veya TXT dosyası yükleyebilirsin. LinkedIn metnini de yapıştırabilirsin.
+        </div>
+
+        <label id="candNameLbl">Ad Soyad</label>
+        <input id="candName"/>
 
         <div class="row">
           <div>
-            <label id="candSourceLbl">Source</label>
-            <input id="candSource" placeholder="LinkedIn / Referral / Application"/>
+            <label id="candSourceLbl">Kaynak</label>
+            <input id="candSource"/>
           </div>
           <div>
-            <label id="candTagsLbl">Tags (comma)</label>
-            <input id="candTags" placeholder="Senior, Remote, FinTech"/>
+            <label id="candTagsLbl">Etiketler (virgülle)</label>
+            <input id="candTags"/>
           </div>
         </div>
 
-        <label id="cvTextLbl">CV text</label>
-        <textarea id="candCV" placeholder="CV metnini yapıştır..."></textarea>
+        <label id="cvTextLbl">CV Metni</label>
+        <textarea id="candCV"></textarea>
 
-        <label id="liTextLbl">LinkedIn text</label>
-        <textarea id="candLI" placeholder="LinkedIn About/Experience metnini yapıştır..."></textarea>
-
-        <div class="btns">
-          <button class="primary" id="saveCand">Save Candidate</button>
-          <button class="ghost" id="resetCand">Reset</button>
+        <div class="row">
+          <div>
+            <label id="cvFileLbl">CV TXT Yükle (opsiyonel)</label>
+            <input id="cvFile" type="file" accept=".txt,text/plain"/>
+            <div class="tiny" id="cvFileHint">PDF/DOCX için şimdilik metni kopyala-yapıştır kullan.</div>
+          </div>
+          <div>
+            <label id="liTextLbl">LinkedIn Metni (opsiyonel)</label>
+            <textarea id="candLI"></textarea>
+          </div>
         </div>
 
-        <div class="hr"></div>
-        <div class="muted" id="candNote">
-          Scorecard/structured evaluation yaklaşımı “tutarlı ve denetlenebilir” değerlendirme sağlar. :contentReference[oaicite:5]{index=5}
+        <div class="btns">
+          <button class="primary" id="saveCand">Adayı Kaydet</button>
+          <button class="ghost" id="resetCand">Temizle</button>
         </div>
       </div>
 
       <div class="card">
-        <h2 id="candListTitle">Candidates</h2>
+        <h2 id="candListTitle">Adaylar</h2>
         <div class="list">
-          <h3 id="candSelectLbl">Select candidate</h3>
+          <h3 id="candSelectLbl">Aday Seç</h3>
           <select id="candSelect"></select>
           <div class="btns">
-            <button class="ghost" id="deleteCand">Delete</button>
+            <button class="danger" id="deleteCand">Sil</button>
           </div>
           <div class="hr"></div>
           <div class="muted" id="candDetail">—</div>
@@ -258,14 +345,19 @@ KYC/AML deneyimi var mı?"></textarea>
   <section class="page" id="page-match" style="display:none">
     <div class="grid">
       <div class="card">
-        <h2 id="matchTitle">Match & Rank</h2>
+        <h2 id="matchTitle">Eşleştir & Sırala</h2>
+
+        <div class="muted" id="matchIntro">
+          Bu ekran “net çıktı” ekranıdır: skor + kanıt + soru-cevap aynı yerde.
+        </div>
+
         <div class="row">
           <div>
-            <label id="matchJobLbl">Job</label>
+            <label id="matchJobLbl">Pozisyon</label>
             <select id="matchJob"></select>
           </div>
           <div>
-            <label id="matchWeightsLbl">Weights</label>
+            <label id="matchWeightsLbl">Ağırlıklar</label>
             <div class="row">
               <input id="wMust" type="number" min="1" step="1" value="12" title="Must"/>
               <input id="wNice" type="number" min="1" step="1" value="5" title="Nice"/>
@@ -274,39 +366,43 @@ KYC/AML deneyimi var mı?"></textarea>
               <input id="wYears" type="number" min="0" step="1" value="8" title="Years"/>
               <input id="wRed" type="number" min="0" step="1" value="10" title="Red penalty"/>
             </div>
+            <div class="tiny" id="weightHint">İpucu: Must ağırlığı ↑ = daha katı filtreleme.</div>
           </div>
         </div>
 
         <div class="btns">
-          <button class="primary" id="runMatch">Run Matching</button>
-          <button class="ghost" id="pushShortlist">Push Top 3 → Shortlist</button>
-          <button class="ghost" id="exportShortlist">Export Shortlist CSV</button>
+          <button class="primary" id="runMatch">Eşleştirmeyi Çalıştır</button>
+          <button class="ghost" id="pushShortlist">İlk 3 Adayı → Kısa Liste’ye Ekle</button>
+          <button class="ghost" id="exportShortlist">Kısa Listeyi CSV İndir</button>
         </div>
 
         <div class="hr"></div>
         <div class="list">
-          <h3 id="rankLbl">Ranking</h3>
-          <div id="ranking" class="muted">—</div>
+          <h3 id="rankLbl">Sıralama</h3>
+          <div class="muted" id="rankEmpty">
+            Henüz skor yok. “Eşleştirmeyi Çalıştır” butonuna bas.
+          </div>
+          <div id="ranking"></div>
         </div>
       </div>
 
       <div class="card">
-        <h2 id="matchDetailTitle">Evidence & QA</h2>
+        <h2 id="matchDetailTitle">Kanıtlar ve Soru-Cevap</h2>
         <div class="list">
-          <h3 id="pickAppLbl">Pick candidate from ranking</h3>
+          <h3 id="pickAppLbl">Sıralamadan Aday Seç</h3>
           <select id="appSelect"></select>
 
           <div class="hr"></div>
           <div id="scoreBadge" class="muted">—</div>
 
           <div class="hr"></div>
-          <h3 id="qaLbl">Q&A (Evidence-based)</h3>
+          <h3 id="qaLbl">Soru-Cevap (Kanıtlı)</h3>
           <div id="qaHost" class="qaGrid"></div>
 
           <div class="hr"></div>
-          <h3 id="eviLbl">Scorecard Evidence</h3>
+          <h3 id="eviLbl">Skor Kartı Kanıtları</h3>
           <table class="table" id="eviTable">
-            <thead><tr><th>Criterion</th><th>Status</th><th>Evidence</th></tr></thead>
+            <thead><tr><th>Kriter</th><th>Durum</th><th>Kanıt</th></tr></thead>
             <tbody><tr><td colspan="3" class="muted">—</td></tr></tbody>
           </table>
         </div>
@@ -317,15 +413,15 @@ KYC/AML deneyimi var mı?"></textarea>
   <!-- PIPELINE -->
   <section class="page" id="page-pipeline" style="display:none">
     <div class="card">
-      <h2 id="pipeTitle">Pipeline</h2>
+      <h2 id="pipeTitle">Süreç (Pipeline)</h2>
       <div class="row">
         <div>
-          <label id="pipeJobLbl">Job</label>
+          <label id="pipeJobLbl">Pozisyon</label>
           <select id="pipeJob"></select>
         </div>
         <div>
-          <label id="pipeHintLbl">Hint</label>
-          <div class="muted" id="pipeHint">Drag candidates between stages (logs it).</div>
+          <label id="pipeHintLbl">İpucu</label>
+          <div class="muted" id="pipeHint">Adayları aşamalar arasında sürükle-bırak yap. Tüm hareketler kayıt altındadır.</div>
         </div>
       </div>
       <div class="hr"></div>
@@ -337,34 +433,34 @@ KYC/AML deneyimi var mı?"></textarea>
   <section class="page" id="page-compare" style="display:none">
     <div class="grid">
       <div class="card">
-        <h2 id="compareTitle">Compare</h2>
-        <label id="cmpJobLbl">Job</label>
+        <h2 id="compareTitle">Karşılaştır</h2>
+        <label id="cmpJobLbl">Pozisyon</label>
         <select id="cmpJob"></select>
 
         <div class="row">
           <div>
-            <label id="cmpALbl">Candidate A</label>
+            <label id="cmpALbl">Aday A</label>
             <select id="cmpA"></select>
           </div>
           <div>
-            <label id="cmpBLbl">Candidate B</label>
+            <label id="cmpBLbl">Aday B</label>
             <select id="cmpB"></select>
           </div>
         </div>
 
         <div class="btns">
-          <button class="primary" id="runCompare">Compare</button>
+          <button class="primary" id="runCompare">Karşılaştır</button>
         </div>
 
         <div class="hr"></div>
         <div class="list">
-          <h3 id="cmpOutLbl">Result</h3>
+          <h3 id="cmpOutLbl">Sonuç</h3>
           <div id="cmpOut" class="muted">—</div>
         </div>
       </div>
 
       <div class="card">
-        <h2 id="cmpQaTitle">Q&A Side-by-side</h2>
+        <h2 id="cmpQaTitle">Soru-Cevap Yan Yana</h2>
         <div class="row">
           <div class="list">
             <h3 id="cmpQaA">A</h3>
@@ -382,25 +478,84 @@ KYC/AML deneyimi var mı?"></textarea>
   <!-- AUDIT -->
   <section class="page" id="page-audit" style="display:none">
     <div class="card">
-      <h2 id="auditTitle">Audit Log</h2>
-      <div class="muted" id="auditNote">
-        İşe alımda otomasyon/AI kullanımı için “şeffaflık + insan gözetimi + dokümantasyon” önemlidir. :contentReference[oaicite:6]{index=6}
+      <h2 id="auditTitle">Kayıt (Audit)</h2>
+      <div class="muted" id="auditIntro">
+        Yapılan her kritik işlem (eşleştirme, stage değişimi vb.) burada kayıt altına alınır.
       </div>
       <div class="hr"></div>
       <div class="list">
-        <h3 id="auditListLbl">Events</h3>
+        <h3 id="auditListLbl">İşlemler</h3>
         <div id="auditList" class="muted">—</div>
       </div>
       <div class="btns">
-        <button class="ghost" id="clearAudit">Clear Audit</button>
-        <button class="ghost" id="clearAll">Reset All Data</button>
+        <button class="ghost" id="clearAudit">Kayıtları Temizle</button>
+        <button class="danger" id="clearAll">Tüm Veriyi Sıfırla</button>
       </div>
     </div>
   </section>
 </main>
 
 <div class="footer" id="footer">
-  LinkedIn URL’den otomatik çekme MVP’de yok (izin/rate-limit/değişken yapı). İçerik upload/paste en güvenlisi.
+  Bu MVP “kanıtlı / deterministik” çalışır. PDF/DOCX okuma istersen (pdf.js + mammoth) ekleyebiliriz.
+</div>
+
+<!-- ✅ Onboarding / Nasıl Kullanılır modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="closeX" id="closeGuide">✕</button>
+    <h2 id="guideTitle">shen-gen Nasıl Kullanılır?</h2>
+    <div class="muted" id="guideSubtitle">3 dakikada net çıktı alacağın akış</div>
+    <div class="hr"></div>
+
+    <div class="grid2">
+      <div class="step">
+        <b id="g1t">1) Pozisyon oluştur</b>
+        <div class="muted" id="g1d">
+          Olmazsa Olmazlar, Artı Değerler ve Soru Setini gir. Soru seti “kanıtlı Q&A” üretir.
+        </div>
+      </div>
+
+      <div class="step">
+        <b id="g2t">2) Aday ekle</b>
+        <div class="muted" id="g2d">
+          CV metnini yapıştır veya TXT yükle. LinkedIn metnini de yapıştırabilirsin.
+        </div>
+      </div>
+
+      <div class="step">
+        <b id="g3t">3) Eşleştir & Sırala</b>
+        <div class="muted" id="g3d">
+          Skor + kanıt + soru cevap aynı yerde. Sistem “metinde bulamadığını” açıkça söyler.
+        </div>
+      </div>
+
+      <div class="step">
+        <b id="g4t">4) Kısa liste + karşılaştır</b>
+        <div class="muted" id="g4d">
+          İlk 3’ü kısa listeye at, pipeline’da ilerlet, Compare ekranında A vs B bak, CSV indir.
+        </div>
+      </div>
+
+      <div class="step">
+        <b id="g5t">Güven kuralı</b>
+        <div class="muted" id="g5d">
+          “Uydurma yok”: Her çıktı kanıta dayanır (snippet). Kanıt yoksa “Bulunamadı” der.
+        </div>
+      </div>
+
+      <div class="step">
+        <b id="g6t">Hızlı demo (isteğe bağlı)</b>
+        <div class="muted" id="g6d">
+          “Şablon” ile pozisyonu doldur, 1-2 aday metni yapıştır, eşleştirmeyi çalıştır.
+        </div>
+        <div class="btns">
+          <button class="primary" id="demoFill">Demo doldur</button>
+          <button class="ghost" id="goMatch">Match ekranına git</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
@@ -409,122 +564,187 @@ KYC/AML deneyimi var mı?"></textarea>
 ========================= */
 const I18N = {
   tr: {
-  tagline:"Mini ATS • Kanıtlı Ön Eleme • Aday Havuzu • Pipeline • Karşılaştır • TR/EN",
-  modeLbl:"Mod", modeVal:"Deterministik",
-  outLbl:"Çıktı", outVal:"Kanıtlı (Uydurma yok)",
+    tagline:"Mini ATS • Kanıtlı Ön Eleme • Aday Havuzu • Pipeline • Karşılaştır • TR/EN",
+    modeLbl:"Mod", modeVal:"Deterministik",
+    outLbl:"Çıktı", outVal:"Kanıtlı (Uydurma yok)",
+    helpBtn:"Nasıl Kullanılır",
 
-  tabs:{
-    jobs:"Pozisyonlar",
-    candidates:"Adaylar",
-    match:"Eşleştir & Sırala",
-    pipeline:"Süreç (Pipeline)",
-    compare:"Karşılaştır",
-    audit:"Kayıt (Audit)"
+    bannerTitle:"Hızlı Başlangıç",
+    bannerText:"1) Pozisyon oluştur → 2) Aday ekle → 3) “Eşleştir & Sırala” ile skor + kanıt gör → 4) Kısa liste + karşılaştır.",
+    hideBanner:"Gizle",
+
+    tabs:{jobs:"Pozisyonlar", candidates:"Adaylar", match:"Eşleştir & Sırala", pipeline:"Süreç (Pipeline)", compare:"Karşılaştır", audit:"Kayıt (Audit)"},
+
+    jobs:{
+      create:"Pozisyon Oluştur",
+      intro:"Bu ekranda aradığın rolü tanımlarsın. Sonra aday ekleyip sistemin kanıtlı taramasını çalıştırırsın.",
+      list:"Pozisyonlar", select:"Pozisyon Seç",
+      title:"Pozisyon Adı", group:"Pozisyon Grubu", loc:"Lokasyon (opsiyonel)",
+      must:"Olmazsa Olmazlar (virgülle)", mustHint:"Örn: SQL, API, Agile, BPMN",
+      nice:"Artı Değerler (virgülle)", niceHint:"Örn: Jira, Confluence, Postman",
+      red:"Kırmızı Bayraklar (virgülle)", redHint:"Örn: sahte, intihal",
+      years:"Minimum Deneyim (yıl)",
+      qs:"Soru Seti (her satıra 1 soru)", qHint:"Sistem her soruya “Kanıtlı / Muhtemel / Bulunamadı” üretir (kanıt snippet’iyle).",
+      save:"Pozisyonu Kaydet", tpl:"Şablon", reset:"Temizle", del:"Sil", clone:"Kopyala"
+    },
+
+    cand:{
+      create:"Aday Ekle",
+      intro:"CV’yi metin olarak yapıştırabilir veya TXT dosyası yükleyebilirsin. LinkedIn metnini de yapıştırabilirsin.",
+      list:"Adaylar", select:"Aday Seç",
+      name:"Ad Soyad", source:"Kaynak", tags:"Etiketler (virgülle)",
+      cv:"CV Metni", cvFile:"CV TXT Yükle (opsiyonel)", cvFileHint:"PDF/DOCX için şimdilik metni kopyala-yapıştır kullan.",
+      li:"LinkedIn Metni (opsiyonel)",
+      save:"Adayı Kaydet", reset:"Temizle", del:"Sil"
+    },
+
+    match:{
+      title:"Eşleştir & Sırala",
+      intro:"Bu ekran “net çıktı” ekranıdır: skor + kanıt + soru-cevap aynı yerde.",
+      job:"Pozisyon", weights:"Ağırlıklar", weightHint:"İpucu: Must ağırlığı ↑ = daha katı filtreleme.",
+      run:"Eşleştirmeyi Çalıştır", push:"İlk 3 Adayı → Kısa Liste’ye Ekle", export:"Kısa Listeyi CSV İndir",
+      ranking:"Sıralama", rankEmpty:"Henüz skor yok. “Eşleştirmeyi Çalıştır” butonuna bas.",
+      pick:"Sıralamadan Aday Seç",
+      detailTitle:"Kanıtlar ve Soru-Cevap",
+      qa:"Soru-Cevap (Kanıtlı)", evi:"Skor Kartı Kanıtları",
+      cols:{crit:"Kriter", status:"Durum", ev:"Kanıt"}
+    },
+
+    pipe:{ title:"Süreç (Pipeline)", job:"Pozisyon", hintLbl:"İpucu",
+      hint:"Adayları aşamalar arasında sürükle-bırak yap. Tüm hareketler kayıt altındadır.",
+      stages:["Yeni","Ön Eleme","Kısa Liste","Mülakat","Teklif","Reddedildi"]
+    },
+
+    cmp:{
+      title:"Karşılaştır", job:"Pozisyon", a:"Aday A", b:"Aday B", run:"Karşılaştır",
+      out:"Sonuç", qa:"Soru-Cevap Yan Yana"
+    },
+
+    audit:{
+      title:"Kayıt (Audit)", intro:"Yapılan her kritik işlem (eşleştirme, stage değişimi vb.) burada kayıt altına alınır.",
+      list:"İşlemler", clear:"Kayıtları Temizle", resetAll:"Tüm Veriyi Sıfırla"
+    },
+
+    guide:{
+      title:"shen-gen Nasıl Kullanılır?",
+      sub:"3 dakikada net çıktı alacağın akış",
+      s1t:"1) Pozisyon oluştur", s1d:"Olmazsa Olmazlar, Artı Değerler ve Soru Setini gir. Soru seti “kanıtlı Q&A” üretir.",
+      s2t:"2) Aday ekle", s2d:"CV metnini yapıştır veya TXT yükle. LinkedIn metnini de yapıştırabilirsin.",
+      s3t:"3) Eşleştir & Sırala", s3d:"Skor + kanıt + soru cevap aynı yerde. Sistem “metinde bulamadığını” açıkça söyler.",
+      s4t:"4) Kısa liste + karşılaştır", s4d:"İlk 3’ü kısa listeye at, pipeline’da ilerlet, Compare ekranında A vs B bak, CSV indir.",
+      s5t:"Güven kuralı", s5d:"“Uydurma yok”: Her çıktı kanıta dayanır (snippet). Kanıt yoksa “Bulunamadı” der.",
+      s6t:"Hızlı demo (isteğe bağlı)", s6d:"“Şablon” ile pozisyonu doldur, 1-2 aday metni yapıştır, eşleştirmeyi çalıştır.",
+      demo:"Demo doldur", go:"Match ekranına git"
+    },
+
+    status:{fit:"Uygun", review:"İncele", weak:"Zayıf Eşleşme", confirmed:"Kanıtlı", likely:"Muhtemel", notfound:"Bulunamadı"},
+    misc:{
+      none:"—",
+      notFound:"Metinde bulunamadı (veri eksik olabilir).",
+      footer:"Bu MVP “kanıtlı / deterministik” çalışır. PDF/DOCX okuma istersen (pdf.js + mammoth) ekleyebiliriz."
+    },
+    placeholders:{
+      jobTitle:"Örn: Kıdemli İş Analisti",
+      jobLoc:"İstanbul / Uzaktan",
+      must:"Örn: SQL, API, Agile, BPMN",
+      nice:"Örn: Jira, Confluence, Postman",
+      red:"Örn: sahte, intihal",
+      candName:"Aday adı soyadı",
+      source:"LinkedIn / Referans / Başvuru",
+      tags:"Örn: Senior, Remote, FinTech",
+      cv:"CV metnini yapıştır...",
+      li:"LinkedIn About/Experience metnini yapıştır..."
+    }
   },
-
-  jobs:{
-    create:"Pozisyon Oluştur",
-    list:"Pozisyonlar",
-    select:"Pozisyon Seç",
-    title:"Pozisyon Adı",
-    group:"Pozisyon Grubu",
-    loc:"Lokasyon (opsiyonel)",
-    must:"Olmazsa Olmazlar (virgülle)",
-    nice:"Artı Değerler (virgülle)",
-    red:"Kırmızı Bayraklar (virgülle)",
-    years:"Minimum Deneyim (yıl)",
-    qs:"Soru Seti (her satıra 1 soru)",
-    save:"Pozisyonu Kaydet",
-    tpl:"Şablon",
-    reset:"Temizle",
-    del:"Sil",
-    clone:"Kopyala"
-  },
-
-  cand:{
-    create:"Aday Ekle",
-    list:"Adaylar",
-    select:"Aday Seç",
-    name:"Ad Soyad",
-    source:"Kaynak",
-    tags:"Etiketler (virgülle)",
-    cv:"CV Metni",
-    li:"LinkedIn Metni",
-    save:"Adayı Kaydet",
-    reset:"Temizle",
-    del:"Sil"
-  },
-
-  match:{
-    title:"Eşleştir & Sırala",
-    job:"Pozisyon",
-    weights:"Ağırlıklar",
-    run:"Eşleştirmeyi Çalıştır",
-    push:"İlk 3 Adayı → Kısa Liste’ye Ekle",
-    export:"Kısa Listeyi CSV İndir",
-    ranking:"Sıralama",
-    pick:"Sıralamadan Aday Seç",
-    qa:"Soru-Cevap (Kanıtlı)",
-    evi:"Skor Kartı Kanıtları"
-  },
-
-  pipe:{
-    title:"Süreç (Pipeline)",
-    job:"Pozisyon",
-    hint:"Adayları aşamalar arasında sürükleyip bırakın (kayıt altına alınır).",
-    stages:["Yeni","Ön Eleme","Kısa Liste","Mülakat","Teklif","Reddedildi"]
-  },
-
-  cmp:{
-    title:"Karşılaştır",
-    job:"Pozisyon",
-    a:"Aday A",
-    b:"Aday B",
-    run:"Karşılaştır",
-    out:"Sonuç",
-    qa:"Soru-Cevap Yan Yana"
-  },
-
-  audit:{
-    title:"Kayıt (Audit)",
-    list:"İşlemler",
-    clear:"Kayıtları Temizle",
-    resetAll:"Tüm Veriyi Sıfırla"
-  },
-
-  status:{
-    fit:"Uygun",
-    review:"İncele",
-    weak:"Zayıf Eşleşme",
-    confirmed:"Kanıtlı",
-    likely:"Muhtemel",
-    notfound:"Bulunamadı"
-  },
-
-  misc:{
-    none:"—",
-    notFound:"Metinde bulunamadı (veri eksik olabilir).",
-    footer:"LinkedIn URL’den otomatik çekme MVP’de yok (izin/rate-limit/yapı değişken). En güvenlisi metin yapıştırma/yükleme."
-  }
-},
 
   en: {
-    tagline:"Mini ATS • Evidence-based Screening • Pipeline • Compare • TR/EN",
-    modeLbl:"Mode", modeVal:"Deterministic", outLbl:"Output", outVal:"Evidence-based",
+    tagline:"Mini ATS • Evidence-based Screening • Candidate Pool • Pipeline • Compare • TR/EN",
+    modeLbl:"Mode", modeVal:"Deterministic",
+    outLbl:"Output", outVal:"Evidence-based (No hallucination)",
+    helpBtn:"How to Use",
+
+    bannerTitle:"Quick Start",
+    bannerText:"1) Create a job → 2) Add candidates → 3) Run “Match & Rank” for score + evidence → 4) Shortlist + compare.",
+    hideBanner:"Hide",
+
     tabs:{jobs:"Jobs", candidates:"Candidates", match:"Match & Rank", pipeline:"Pipeline", compare:"Compare", audit:"Audit"},
-    jobs:{create:"Create Job", list:"Jobs", select:"Select job", title:"Job title", group:"Job group", loc:"Location (optional)",
-      must:"Must-have (comma)", nice:"Nice-to-have (comma)", red:"Red flags (comma)", years:"Min years", qs:"Question set (one per line)",
-      save:"Save Job", tpl:"Template", reset:"Reset", del:"Delete", clone:"Clone"},
-    cand:{create:"Create Candidate", list:"Candidates", select:"Select candidate", name:"Full name", source:"Source", tags:"Tags (comma)",
-      cv:"CV text", li:"LinkedIn text", save:"Save Candidate", reset:"Reset", del:"Delete"},
-    match:{title:"Match & Rank", job:"Job", weights:"Weights", run:"Run Matching", push:"Push Top 3 → Shortlist", export:"Export Shortlist CSV",
-      ranking:"Ranking", pick:"Pick candidate from ranking", qa:"Q&A (Evidence-based)", evi:"Scorecard Evidence"},
-    pipe:{title:"Pipeline", job:"Job", hint:"Drag candidates between stages (logged).",
-      stages:["New","Screened","Shortlist","Interview","Offer","Rejected"]},
-    cmp:{title:"Compare", job:"Job", a:"Candidate A", b:"Candidate B", run:"Compare", out:"Result", qa:"Q&A Side-by-side"},
-    audit:{title:"Audit Log", list:"Events", clear:"Clear Audit", resetAll:"Reset All Data"},
+
+    jobs:{
+      create:"Create Job",
+      intro:"Define the role here. Then add candidates and run evidence-based matching.",
+      list:"Jobs", select:"Select job",
+      title:"Job title", group:"Job group", loc:"Location (optional)",
+      must:"Must-have (comma)", mustHint:"e.g. SQL, API, Agile, BPMN",
+      nice:"Nice-to-have (comma)", niceHint:"e.g. Jira, Confluence, Postman",
+      red:"Red flags (comma)", redHint:"e.g. fake, plagiarism",
+      years:"Minimum experience (years)",
+      qs:"Question set (one per line)", qHint:"For each question you get “Confirmed / Likely / Not found” with a snippet.",
+      save:"Save Job", tpl:"Template", reset:"Clear", del:"Delete", clone:"Clone"
+    },
+
+    cand:{
+      create:"Create Candidate",
+      intro:"Paste CV text or upload a TXT file. You can also paste LinkedIn text.",
+      list:"Candidates", select:"Select candidate",
+      name:"Full name", source:"Source", tags:"Tags (comma)",
+      cv:"CV text", cvFile:"Upload CV TXT (optional)", cvFileHint:"For PDF/DOCX, use copy-paste in this MVP.",
+      li:"LinkedIn text (optional)",
+      save:"Save Candidate", reset:"Clear", del:"Delete"
+    },
+
+    match:{
+      title:"Match & Rank",
+      intro:"This is the “clear output” screen: score + evidence + Q&A together.",
+      job:"Job", weights:"Weights", weightHint:"Tip: higher Must weight = stricter filtering.",
+      run:"Run Matching", push:"Push Top 3 → Shortlist", export:"Download Shortlist CSV",
+      ranking:"Ranking", rankEmpty:"No scores yet. Click “Run Matching”.",
+      pick:"Pick candidate from ranking",
+      detailTitle:"Evidence & Q&A",
+      qa:"Q&A (Evidence-based)", evi:"Scorecard Evidence",
+      cols:{crit:"Criterion", status:"Status", ev:"Evidence"}
+    },
+
+    pipe:{ title:"Pipeline", job:"Job", hintLbl:"Hint",
+      hint:"Drag-drop candidates between stages. All changes are logged.",
+      stages:["New","Screened","Shortlist","Interview","Offer","Rejected"]
+    },
+
+    cmp:{ title:"Compare", job:"Job", a:"Candidate A", b:"Candidate B", run:"Compare", out:"Result", qa:"Q&A Side-by-side" },
+
+    audit:{ title:"Audit", intro:"Every critical action (matching, stage changes, etc.) is logged here.",
+      list:"Events", clear:"Clear Audit", resetAll:"Reset All Data"
+    },
+
+    guide:{
+      title:"How to use shen-gen?",
+      sub:"Get a clear output in 3 minutes",
+      s1t:"1) Create a job", s1d:"Enter Must/Nice and a question set for evidence-based Q&A.",
+      s2t:"2) Add candidates", s2d:"Paste CV text or upload TXT. Optionally paste LinkedIn text.",
+      s3t:"3) Match & Rank", s3d:"Score + evidence + Q&A in one place. If it’s not in the text, it says so.",
+      s4t:"4) Shortlist + compare", s4d:"Push top 3 to shortlist, move in pipeline, compare A vs B, export CSV.",
+      s5t:"Trust rule", s5d:"No hallucinations: Every output is backed by an evidence snippet. Otherwise: Not found.",
+      s6t:"Quick demo (optional)", s6d:"Use “Template”, paste 1-2 candidates, run matching.",
+      demo:"Fill demo", go:"Go to Match"
+    },
+
     status:{fit:"Fit", review:"Review", weak:"Weak match", confirmed:"Confirmed", likely:"Likely", notfound:"Not found"},
-    misc:{none:"—", notFound:"Not found in text (data may be missing).", footer:"No LinkedIn URL fetch in MVP (permissions/rate limits/layout changes). Upload/paste content is safest."}
+    misc:{
+      none:"—",
+      notFound:"Not found in text (data may be missing).",
+      footer:"This MVP is deterministic & evidence-based. If you want PDF/DOCX parsing, we can add pdf.js + mammoth."
+    },
+    placeholders:{
+      jobTitle:"e.g. Senior Business Analyst",
+      jobLoc:"Istanbul / Remote",
+      must:"e.g. SQL, API, Agile, BPMN",
+      nice:"e.g. Jira, Confluence, Postman",
+      red:"e.g. fake, plagiarism",
+      candName:"Candidate full name",
+      source:"LinkedIn / Referral / Application",
+      tags:"e.g. Senior, Remote, FinTech",
+      cv:"Paste CV text...",
+      li:"Paste LinkedIn About/Experience text..."
+    }
   }
 };
 let LANG = "tr";
@@ -534,119 +754,20 @@ function t(path){
   for(const p of parts){ cur = cur?.[p]; }
   return cur ?? path;
 }
-function applyLang(){
-  document.getElementById("tagline").textContent = t("tagline");
-  document.getElementById("modeLbl").textContent = t("modeLbl");
-  document.getElementById("modeVal").textContent = t("modeVal");
-  document.getElementById("outLbl").textContent = t("outLbl");
-  document.getElementById("outVal").textContent = t("outVal");
-
-  // tabs
-  document.getElementById("tabJobs").textContent = t("tabs.jobs");
-  document.getElementById("tabCand").textContent = t("tabs.candidates");
-  document.getElementById("tabMatch").textContent = t("tabs.match");
-  document.getElementById("tabPipe").textContent = t("tabs.pipeline");
-  document.getElementById("tabCompare").textContent = t("tabs.compare");
-  document.getElementById("tabAudit").textContent = t("tabs.audit");
-
-  // jobs labels
-  document.getElementById("jobCreateTitle").textContent = t("jobs.create");
-  document.getElementById("jobListTitle").textContent = t("jobs.list");
-  document.getElementById("jobSelectLbl").textContent = t("jobs.select");
-  document.getElementById("jobTitleLbl").textContent = t("jobs.title");
-  document.getElementById("jobGroupLbl").textContent = t("jobs.group");
-  document.getElementById("jobLocLbl").textContent = t("jobs.loc");
-  document.getElementById("mustLbl").textContent = t("jobs.must");
-  document.getElementById("niceLbl").textContent = t("jobs.nice");
-  document.getElementById("redLbl").textContent = t("jobs.red");
-  document.getElementById("minYearsLbl").textContent = t("jobs.years");
-  document.getElementById("qSetLbl").textContent = t("jobs.qs");
-  document.getElementById("saveJob").textContent = t("jobs.save");
-  document.getElementById("jobTemplate").textContent = t("jobs.tpl");
-  document.getElementById("resetJob").textContent = t("jobs.reset");
-  document.getElementById("deleteJob").textContent = t("jobs.del");
-  document.getElementById("cloneJob").textContent = t("jobs.clone");
-
-  // candidate labels
-  document.getElementById("candCreateTitle").textContent = t("cand.create");
-  document.getElementById("candListTitle").textContent = t("cand.list");
-  document.getElementById("candSelectLbl").textContent = t("cand.select");
-  document.getElementById("candNameLbl").textContent = t("cand.name");
-  document.getElementById("candSourceLbl").textContent = t("cand.source");
-  document.getElementById("candTagsLbl").textContent = t("cand.tags");
-  document.getElementById("cvTextLbl").textContent = t("cand.cv");
-  document.getElementById("liTextLbl").textContent = t("cand.li");
-  document.getElementById("saveCand").textContent = t("cand.save");
-  document.getElementById("resetCand").textContent = t("cand.reset");
-  document.getElementById("deleteCand").textContent = t("cand.del");
-
-  // match labels
-  document.getElementById("matchTitle").textContent = t("match.title");
-  document.getElementById("matchJobLbl").textContent = t("match.job");
-  document.getElementById("matchWeightsLbl").textContent = t("match.weights");
-  document.getElementById("runMatch").textContent = t("match.run");
-  document.getElementById("pushShortlist").textContent = t("match.push");
-  document.getElementById("exportShortlist").textContent = t("match.export");
-  document.getElementById("rankLbl").textContent = t("match.ranking");
-  document.getElementById("pickAppLbl").textContent = t("match.pick");
-  document.getElementById("qaLbl").textContent = t("match.qa");
-  document.getElementById("eviLbl").textContent = t("match.evi");
-
-  // pipeline labels
-  document.getElementById("pipeTitle").textContent = t("pipe.title");
-  document.getElementById("pipeJobLbl").textContent = t("pipe.job");
-  document.getElementById("pipeHint").textContent = t("pipe.hint");
-
-  // compare labels
-  document.getElementById("compareTitle").textContent = t("cmp.title");
-  document.getElementById("cmpJobLbl").textContent = t("cmp.job");
-  document.getElementById("cmpALbl").textContent = t("cmp.a");
-  document.getElementById("cmpBLbl").textContent = t("cmp.b");
-  document.getElementById("runCompare").textContent = t("cmp.run");
-  document.getElementById("cmpOutLbl").textContent = t("cmp.out");
-  document.getElementById("cmpQaTitle").textContent = t("cmp.qa");
-
-  // audit
-  document.getElementById("auditTitle").textContent = t("audit.title");
-  document.getElementById("auditListLbl").textContent = t("audit.list");
-  document.getElementById("clearAudit").textContent = t("audit.clear");
-  document.getElementById("clearAll").textContent = t("audit.resetAll");
-
-  document.getElementById("footer").textContent = t("misc.footer");
-  
-  // placeholders (TR/EN)
-document.getElementById("jobTitle").placeholder = (LANG==="tr") ? "Örn: Kıdemli İş Analisti" : "e.g. Senior Business Analyst";
-document.getElementById("jobLoc").placeholder   = (LANG==="tr") ? "İstanbul / Uzaktan" : "Istanbul / Remote";
-document.getElementById("jobMust").placeholder  = (LANG==="tr") ? "Örn: SQL, API, Agile, BPMN" : "e.g. SQL, API, Agile, BPMN";
-document.getElementById("jobNice").placeholder  = (LANG==="tr") ? "Örn: Jira, Confluence, Postman" : "e.g. Jira, Confluence, Postman";
-document.getElementById("jobRed").placeholder   = (LANG==="tr") ? "Örn: sahte, intihal" : "e.g. fake, plagiarism";
-
-document.getElementById("candName").placeholder   = (LANG==="tr") ? "Aday adı soyadı" : "Candidate full name";
-document.getElementById("candSource").placeholder = (LANG==="tr") ? "LinkedIn / Referans / Başvuru" : "LinkedIn / Referral / Application";
-document.getElementById("candTags").placeholder   = (LANG==="tr") ? "Örn: Senior, Remote, FinTech" : "e.g. Senior, Remote, FinTech";
-document.getElementById("candCV").placeholder     = (LANG==="tr") ? "CV metnini yapıştır..." : "Paste CV text...";
-document.getElementById("candLI").placeholder     = (LANG==="tr") ? "LinkedIn About/Experience metnini yapıştır..." : "Paste LinkedIn About/Experience text...";
-
-}
 
 /* =========================
    Storage
 ========================= */
-const KEY = "shen_gen_mini_ats_v1";
+const KEY = "shen_gen_app_v2";
 function loadDB(){
   const raw = localStorage.getItem(KEY);
   if(raw) return JSON.parse(raw);
-  // seed minimal
-  return { jobs:[], candidates:[], applications:[], audit:[] };
+  return { jobs:[], candidates:[], applications:[], audit:[], ui:{bannerHidden:false, guideSeen:false} };
 }
-function saveDB(){
-  localStorage.setItem(KEY, JSON.stringify(DB));
-}
+function saveDB(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
 let DB = loadDB();
 
-function uid(prefix){
-  return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
-}
+function uid(prefix){ return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
 function nowISO(){ return new Date().toISOString(); }
 function logAudit(action, entityType, entityId, before, after){
   DB.audit.unshift({ id:uid("aud"), ts:nowISO(), action, entityType, entityId, before, after });
@@ -705,7 +826,7 @@ const SYN = {
     "sql":["postgres","oracle","mssql","mysql","query","sorgu"],
     "leadership":["team lead","takım lideri","managed","yönetti","mentoring","mentorluk"],
     "crm":["salesforce","dynamics","hubspot","müşteri ilişkileri"],
-    "kpi":["okr","okrs","metrics","hedef","performans"],
+    "kpi":["okr","metrics","hedef","performans"],
     "kyc":["aml","masak","know your customer","kimlik doğrulama","nfc","liveness"],
     "devops":["ci/cd","pipeline","docker","kubernetes","terraform","helm"]
   },
@@ -749,7 +870,6 @@ function answerQuestion(combinedText, q, synPack){
   if(exact){
     return { level:"ok", label:t("status.confirmed"), evidence: exact };
   }
-  // token evidence
   const tokens = (q||"").toLowerCase().split(/[^a-z0-9ğüşöçıİĞÜŞÖÇ]+/i).map(x=>x.trim()).filter(x=>x.length>=3);
   for(const tok of tokens){
     if(tN.includes(tok)){
@@ -757,7 +877,6 @@ function answerQuestion(combinedText, q, synPack){
       return { level:"ok", label:t("status.confirmed"), evidence: ev || "" };
     }
   }
-  // synonym-based likely if question hints a key
   const qN = norm(q);
   for(const key of Object.keys(synPack)){
     const variants = [key].concat(synPack[key]||[]);
@@ -831,7 +950,6 @@ function scorecard(job, candidate, weights){
 
   const score = clamp(Math.round((points/max)*100),0,100);
 
-  // status bucket
   let bucket = t("status.weak");
   if(score >= 75) bucket = t("status.fit");
   else if(score >= 55) bucket = t("status.review");
@@ -851,8 +969,137 @@ function buildQA(job, candidate){
 }
 
 /* =========================
-   Rendering: dropdowns
+   Rendering
 ========================= */
+function applyLang(){
+  $("tagline").textContent = t("tagline");
+  $("modeLbl").textContent = t("modeLbl");
+  $("modeVal").textContent = t("modeVal");
+  $("outLbl").textContent = t("outLbl");
+  $("outVal").textContent = t("outVal");
+  $("helpBtnTxt").textContent = t("helpBtn");
+
+  $("bannerTitle").textContent = t("bannerTitle");
+  $("bannerText").textContent = t("bannerText");
+  $("hideBannerTxt").textContent = t("hideBanner");
+
+  $("tabJobs").textContent = t("tabs.jobs");
+  $("tabCand").textContent = t("tabs.candidates");
+  $("tabMatch").textContent = t("tabs.match");
+  $("tabPipe").textContent = t("tabs.pipeline");
+  $("tabCompare").textContent = t("tabs.compare");
+  $("tabAudit").textContent = t("tabs.audit");
+
+  // Jobs
+  $("jobCreateTitle").textContent = t("jobs.create");
+  $("jobIntro").textContent = t("jobs.intro");
+  $("jobListTitle").textContent = t("jobs.list");
+  $("jobSelectLbl").textContent = t("jobs.select");
+  $("jobTitleLbl").textContent = t("jobs.title");
+  $("jobGroupLbl").textContent = t("jobs.group");
+  $("jobLocLbl").textContent = t("jobs.loc");
+  $("mustLbl").textContent = t("jobs.must");
+  $("mustHint").textContent = t("jobs.mustHint");
+  $("niceLbl").textContent = t("jobs.nice");
+  $("niceHint").textContent = t("jobs.niceHint");
+  $("redLbl").textContent = t("jobs.red");
+  $("redHint").textContent = t("jobs.redHint");
+  $("minYearsLbl").textContent = t("jobs.years");
+  $("qSetLbl").textContent = t("jobs.qs");
+  $("qHint").textContent = t("jobs.qHint");
+  $("saveJob").textContent = t("jobs.save");
+  $("jobTemplate").textContent = t("jobs.tpl");
+  $("resetJob").textContent = t("jobs.reset");
+  $("deleteJob").textContent = t("jobs.del");
+  $("cloneJob").textContent = t("jobs.clone");
+  $("grpAuto").textContent = (LANG==="tr") ? "Otomatik" : "Auto";
+
+  // Candidates
+  $("candCreateTitle").textContent = t("cand.create");
+  $("candIntro").textContent = t("cand.intro");
+  $("candListTitle").textContent = t("cand.list");
+  $("candSelectLbl").textContent = t("cand.select");
+  $("candNameLbl").textContent = t("cand.name");
+  $("candSourceLbl").textContent = t("cand.source");
+  $("candTagsLbl").textContent = t("cand.tags");
+  $("cvTextLbl").textContent = t("cand.cv");
+  $("cvFileLbl").textContent = t("cand.cvFile");
+  $("cvFileHint").textContent = t("cand.cvFileHint");
+  $("liTextLbl").textContent = t("cand.li");
+  $("saveCand").textContent = t("cand.save");
+  $("resetCand").textContent = t("cand.reset");
+  $("deleteCand").textContent = t("cand.del");
+
+  // Match
+  $("matchTitle").textContent = t("match.title");
+  $("matchIntro").textContent = t("match.intro");
+  $("matchJobLbl").textContent = t("match.job");
+  $("matchWeightsLbl").textContent = t("match.weights");
+  $("weightHint").textContent = t("match.weightHint");
+  $("runMatch").textContent = t("match.run");
+  $("pushShortlist").textContent = t("match.push");
+  $("exportShortlist").textContent = t("match.export");
+  $("rankLbl").textContent = t("match.ranking");
+  $("rankEmpty").textContent = t("match.rankEmpty");
+  $("matchDetailTitle").textContent = t("match.detailTitle");
+  $("pickAppLbl").textContent = t("match.pick");
+  $("qaLbl").textContent = t("match.qa");
+  $("eviLbl").textContent = t("match.evi");
+  // table headers
+  const ths = $("eviTable").querySelectorAll("thead th");
+  ths[0].textContent = t("match.cols.crit");
+  ths[1].textContent = t("match.cols.status");
+  ths[2].textContent = t("match.cols.ev");
+
+  // Pipeline
+  $("pipeTitle").textContent = t("pipe.title");
+  $("pipeJobLbl").textContent = t("pipe.job");
+  $("pipeHintLbl").textContent = t("pipe.hintLbl");
+  $("pipeHint").textContent = t("pipe.hint");
+
+  // Compare
+  $("compareTitle").textContent = t("cmp.title");
+  $("cmpJobLbl").textContent = t("cmp.job");
+  $("cmpALbl").textContent = t("cmp.a");
+  $("cmpBLbl").textContent = t("cmp.b");
+  $("runCompare").textContent = t("cmp.run");
+  $("cmpOutLbl").textContent = t("cmp.out");
+  $("cmpQaTitle").textContent = t("cmp.qa");
+
+  // Audit
+  $("auditTitle").textContent = t("audit.title");
+  $("auditIntro").textContent = t("audit.intro");
+  $("auditListLbl").textContent = t("audit.list");
+  $("clearAudit").textContent = t("audit.clear");
+  $("clearAll").textContent = t("audit.resetAll");
+
+  // Guide
+  $("guideTitle").textContent = t("guide.title");
+  $("guideSubtitle").textContent = t("guide.sub");
+  $("g1t").textContent = t("guide.s1t"); $("g1d").textContent = t("guide.s1d");
+  $("g2t").textContent = t("guide.s2t"); $("g2d").textContent = t("guide.s2d");
+  $("g3t").textContent = t("guide.s3t"); $("g3d").textContent = t("guide.s3d");
+  $("g4t").textContent = t("guide.s4t"); $("g4d").textContent = t("guide.s4d");
+  $("g5t").textContent = t("guide.s5t"); $("g5d").textContent = t("guide.s5d");
+  $("g6t").textContent = t("guide.s6t"); $("g6d").textContent = t("guide.s6d");
+  $("demoFill").textContent = t("guide.demo");
+  $("goMatch").textContent = t("guide.go");
+
+  // placeholders
+  $("jobTitle").placeholder = t("placeholders.jobTitle");
+  $("jobLoc").placeholder = t("placeholders.jobLoc");
+  $("jobMust").placeholder = t("placeholders.must");
+  $("jobNice").placeholder = t("placeholders.nice");
+  $("jobRed").placeholder = t("placeholders.red");
+  $("candName").placeholder = t("placeholders.candName");
+  $("candSource").placeholder = t("placeholders.source");
+  $("candTags").placeholder = t("placeholders.tags");
+  $("candCV").placeholder = t("placeholders.cv");
+  $("candLI").placeholder = t("placeholders.li");
+
+  $("footer").textContent = t("misc.footer");
+}
+
 function renderJobs(){
   const sel = $("jobSelect");
   const m1 = $("matchJob");
@@ -872,7 +1119,6 @@ function renderJobs(){
     opt.value=j.id; opt.textContent = j.title;
     [sel,m1,p1,c1].forEach(s=> s.appendChild(opt.cloneNode(true)));
   });
-  // keep selection
   if(!sel.value) sel.value = DB.jobs[0].id;
   if(!m1.value) m1.value = DB.jobs[0].id;
   if(!p1.value) p1.value = DB.jobs[0].id;
@@ -926,7 +1172,7 @@ function renderCandDetail(){
 function ensureApplication(jobId, candId){
   let a = DB.applications.find(x=>x.jobId===jobId && x.candId===candId);
   if(!a){
-    a = { id:uid("app"), jobId, candId, stage:"New", score:null, bucket:null, qa:[], evidence:[], updatedAt:nowISO() };
+    a = { id:uid("app"), jobId, candId, stage:(LANG==="tr"?"Yeni":"New"), score:null, bucket:null, qa:[], evidence:[], updatedAt:nowISO() };
     DB.applications.push(a);
     saveDB();
     logAudit("APPLICATION_CREATE","Application",a.id,null,a);
@@ -937,11 +1183,11 @@ function ensureApplication(jobId, candId){
 /* =========================
    MATCH & RANK
 ========================= */
-let LAST_RANK = []; // {appId, candId, score}
+let LAST_RANK = [];
 function runMatching(){
   const jobId = $("matchJob").value;
   const job = DB.jobs.find(j=>j.id===jobId);
-  if(!job){ $("ranking").textContent=t("misc.none"); return; }
+  if(!job){ return; }
 
   const weights = {
     wMust:Number($("wMust").value||12),
@@ -970,7 +1216,7 @@ function runMatching(){
   ranked.sort((a,b)=>b.score-a.score);
   LAST_RANK = ranked;
 
-  // render ranking list
+  $("rankEmpty").style.display = ranked.length ? "none" : "block";
   $("ranking").innerHTML = ranked.map((r,i)=>{
     const c = DB.candidates.find(x=>x.id===r.candId);
     return `<div class="candCard" data-app="${r.appId}">
@@ -980,9 +1226,8 @@ function runMatching(){
         <span class="pill2 warn">${escapeHtml(r.bucket||"")}</span>
       </div>
     </div>`;
-  }).join("") || t("misc.none");
+  }).join("") || "";
 
-  // appSelect
   const aSel = $("appSelect");
   aSel.innerHTML="";
   ranked.forEach(r=>{
@@ -993,7 +1238,6 @@ function runMatching(){
     aSel.appendChild(opt);
   });
   if(ranked.length) aSel.value = ranked[0].appId;
-
   renderAppDetail();
 }
 
@@ -1004,7 +1248,6 @@ function renderAppDetail(){
   const cand = DB.candidates.find(c=>c.id===app.candId);
   $("scoreBadge").innerHTML = `<b>${escapeHtml(cand?.name||"")}</b> • score: <span class="score">${escapeHtml(String(app.score))}</span> • ${escapeHtml(app.bucket||"")}`;
 
-  // QA
   const qaHost = $("qaHost");
   qaHost.innerHTML = "";
   (app.qa||[]).forEach(item=>{
@@ -1020,7 +1263,6 @@ function renderAppDetail(){
       </div>`;
   });
 
-  // Evidence table
   const tbody = $("eviTable").querySelector("tbody");
   tbody.innerHTML = "";
   (app.evidence||[]).forEach(r=>{
@@ -1036,13 +1278,12 @@ function renderAppDetail(){
 }
 
 function pushTop3ToShortlist(){
-  const jobId = $("matchJob").value;
   const top = LAST_RANK.slice(0,3);
   top.forEach(r=>{
     const app = DB.applications.find(x=>x.id===r.appId);
     if(!app) return;
     const before = {...app};
-    app.stage = "Shortlist";
+    app.stage = (LANG==="tr" ? "Kısa Liste" : "Shortlist");
     app.updatedAt = nowISO();
     logAudit("STAGE_SET","Application",app.id,before,app);
   });
@@ -1053,14 +1294,13 @@ function pushTop3ToShortlist(){
 function exportShortlistCSV(){
   const jobId = $("matchJob").value;
   const job = DB.jobs.find(j=>j.id===jobId);
-  const apps = DB.applications.filter(a=>a.jobId===jobId && a.stage==="Shortlist");
+  const shortlistStage = (LANG==="tr" ? "Kısa Liste" : "Shortlist");
+  const apps = DB.applications.filter(a=>a.jobId===jobId && a.stage===shortlistStage);
   const rows = [["Job","Candidate","Score","Bucket","Stage","Source","Tags"]];
-
   apps.forEach(a=>{
     const c = DB.candidates.find(x=>x.id===a.candId);
     rows.push([job?.title||"", c?.name||"", String(a.score||""), a.bucket||"", a.stage, c?.source||"", (c?.tags||[]).join("|")]);
   });
-
   const csv = rows.map(r=>r.map(cell=>{
     const s = (cell||"").toString().replace(/"/g,'""');
     return `"${s}"`;
@@ -1147,7 +1387,6 @@ function renderCompareDropdowns(){
 }
 
 function runCompare(){
-  const jobId = $("cmpJob").value;
   const aId = $("cmpA").value;
   const bId = $("cmpB").value;
   const appA = DB.applications.find(x=>x.id===aId);
@@ -1158,13 +1397,12 @@ function runCompare(){
   const candB = DB.candidates.find(c=>c.id===appB.candId);
 
   if(appA.score === appB.score){
-    $("cmpOut").textContent = t("cmp.equal") || "Equal";
+    $("cmpOut").textContent = (LANG==="tr") ? "Skorlar eşit. Kanıtları ve soru cevaplarını incele." : "Scores are equal. Review evidence and Q&A.";
   }else{
     const win = appA.score > appB.score ? candA?.name : candB?.name;
     $("cmpOut").innerHTML = `<span class="pill2 ok">${escapeHtml(win||"")}</span> • ${escapeHtml(String(appA.score))} vs ${escapeHtml(String(appB.score))}`;
   }
 
-  // QA side-by-side
   $("cmpQaA").textContent = (candA?.name||"A");
   $("cmpQaB").textContent = (candB?.name||"B");
 
@@ -1189,7 +1427,7 @@ function runCompare(){
 function renderAudit(){
   const host = $("auditList");
   if(!DB.audit.length){ host.textContent = t("misc.none"); return; }
-  host.innerHTML = DB.audit.slice(0,80).map(e=>{
+  host.innerHTML = DB.audit.slice(0,90).map(e=>{
     return `<div class="candCard">
       <b>${escapeHtml(e.action)}</b>
       <div class="tiny">${escapeHtml(e.ts)} • ${escapeHtml(e.entityType)}:${escapeHtml(e.entityId)}</div>
@@ -1198,12 +1436,12 @@ function renderAudit(){
 }
 
 /* =========================
-   Actions: Save/Delete
+   Actions
 ========================= */
 function saveJob(){
   const job = {
     id: uid("job"),
-    title: $("jobTitle").value.trim() || "Untitled Job",
+    title: $("jobTitle").value.trim() || (LANG==="tr" ? "Yeni Pozisyon" : "New Job"),
     group: $("jobGroup").value,
     location: $("jobLoc").value.trim(),
     must: csvToList($("jobMust").value),
@@ -1226,7 +1464,6 @@ function deleteJob(){
   const job = DB.jobs.find(j=>j.id===id);
   if(!job) return;
   DB.jobs = DB.jobs.filter(j=>j.id!==id);
-  // also remove applications for that job
   DB.applications = DB.applications.filter(a=>a.jobId!==id);
   saveDB();
   logAudit("JOB_DELETE","Job",id,job,null);
@@ -1237,7 +1474,7 @@ function cloneJob(){
   const id = $("jobSelect").value;
   const job = DB.jobs.find(j=>j.id===id);
   if(!job) return;
-  const copy = {...job, id:uid("job"), title: job.title + " (copy)", createdAt:nowISO()};
+  const copy = {...job, id:uid("job"), title: job.title + (LANG==="tr" ? " (kopya)" : " (copy)"), createdAt:nowISO()};
   DB.jobs.push(copy);
   saveDB();
   logAudit("JOB_CLONE","Job",copy.id,null,copy);
@@ -1247,18 +1484,23 @@ function cloneJob(){
 }
 
 function jobTemplate(){
-  $("jobTitle").value = "Senior Business Analyst";
+  $("jobTitle").value = (LANG==="tr") ? "Kıdemli İş Analisti" : "Senior Business Analyst";
   $("jobGroup").value = "product";
-  $("jobLoc").value = "Istanbul / Remote";
+  $("jobLoc").value = (LANG==="tr") ? "İstanbul / Uzaktan" : "Istanbul / Remote";
   $("jobMust").value = "business analysis, user story, acceptance criteria, BPMN, API, SQL, stakeholder";
   $("jobNice").value = "Jira, Confluence, Postman, microservices, KYC, AML";
-  $("jobRed").value = "fake, plagiarism, unrelated";
+  $("jobRed").value = (LANG==="tr") ? "sahte, intihal, alakasız" : "fake, plagiarism, unrelated";
   $("jobMinYears").value = 5;
   $("jobQs").value =
-`Liderlik / ekip yönetimi kanıtı var mı?
+(LANG==="tr")
+? `Liderlik / ekip yönetimi kanıtı var mı?
 API entegrasyon tecrübesi var mı?
 KYC/AML/MASAK benzeri tecrübe var mı?
-Jira/Confluence gibi araçlar geçmiş mi?`;
+Jira/Confluence gibi araçlar geçmiş mi?`
+: `Is there evidence of leadership/team management?
+Any API integration experience?
+Any KYC/AML compliance experience?
+Mentions tools like Jira/Confluence?`;
 }
 
 function resetJob(){
@@ -1269,7 +1511,7 @@ function resetJob(){
 function saveCandidate(){
   const cand = {
     id: uid("cand"),
-    name: $("candName").value.trim() || "Unnamed",
+    name: $("candName").value.trim() || (LANG==="tr" ? "İsimsiz Aday" : "Unnamed"),
     source: $("candSource").value.trim(),
     tags: csvToList($("candTags").value),
     cvText: $("candCV").value || "",
@@ -1297,6 +1539,7 @@ function deleteCandidate(){
 
 function resetCandidate(){
   ["candName","candSource","candTags","candCV","candLI"].forEach(id=>$(id).value="");
+  $("cvFile").value = "";
 }
 
 function clearAudit(){
@@ -1304,6 +1547,7 @@ function clearAudit(){
   saveDB();
   renderAudit();
 }
+
 function clearAll(){
   localStorage.removeItem(KEY);
   DB = loadDB();
@@ -1318,12 +1562,10 @@ function showTab(name){
   document.querySelectorAll(".page").forEach(p=>p.style.display="none");
   document.querySelector(`.tab[data-tab="${name}"]`)?.classList.add("active");
   document.getElementById("page-"+name).style.display = "block";
-  // per-page refresh
   if(name==="jobs") renderJobDetail();
   if(name==="candidates") renderCandDetail();
   if(name==="pipeline") renderPipeline();
   if(name==="compare") renderCompareDropdowns();
-  if(name==="match") {} // keep last
   if(name==="audit") renderAudit();
 }
 document.querySelectorAll(".tab").forEach(el=>{
@@ -1333,19 +1575,22 @@ document.querySelectorAll(".tab").forEach(el=>{
 /* =========================
    Wiring
 ========================= */
-$("lang").addEventListener("change", (e)=>{ LANG = e.target.value; applyLang(); renderAll(); });
-
+$("lang").addEventListener("change", (e)=>{
+  LANG = e.target.value;
+  applyLang();
+  renderAll();
+});
 $("saveJob").addEventListener("click", saveJob);
 $("deleteJob").addEventListener("click", deleteJob);
 $("cloneJob").addEventListener("click", cloneJob);
 $("jobTemplate").addEventListener("click", jobTemplate);
 $("resetJob").addEventListener("click", resetJob);
-$("jobSelect").addEventListener("change", ()=>{ renderJobDetail(); });
+$("jobSelect").addEventListener("change", renderJobDetail);
 
 $("saveCand").addEventListener("click", saveCandidate);
 $("deleteCand").addEventListener("click", deleteCandidate);
 $("resetCand").addEventListener("click", resetCandidate);
-$("candSelect").addEventListener("change", ()=>{ renderCandDetail(); });
+$("candSelect").addEventListener("change", renderCandDetail);
 
 $("runMatch").addEventListener("click", runMatching);
 $("appSelect").addEventListener("change", renderAppDetail);
@@ -1353,12 +1598,60 @@ $("pushShortlist").addEventListener("click", pushTop3ToShortlist);
 $("exportShortlist").addEventListener("click", exportShortlistCSV);
 
 $("pipeJob").addEventListener("change", renderPipeline);
-
 $("cmpJob").addEventListener("change", renderCompareDropdowns);
 $("runCompare").addEventListener("click", runCompare);
 
 $("clearAudit").addEventListener("click", clearAudit);
 $("clearAll").addEventListener("click", clearAll);
+
+// CV TXT upload
+$("cvFile").addEventListener("change", async (e)=>{
+  const f = e.target.files?.[0];
+  if(!f) return;
+  const text = await f.text();
+  $("candCV").value = text;
+});
+
+// Guide
+function openGuide(){ $("overlay").style.display = "flex"; }
+function closeGuide(){ $("overlay").style.display = "none"; DB.ui.guideSeen = true; saveDB(); }
+$("openGuide").addEventListener("click", openGuide);
+$("closeGuide").addEventListener("click", closeGuide);
+$("overlay").addEventListener("click", (e)=>{ if(e.target.id==="overlay") closeGuide(); });
+
+$("demoFill").addEventListener("click", ()=>{
+  jobTemplate();
+  // Seed candidates (short, safe demo)
+  if(!DB.candidates.length){
+    $("candName").value = (LANG==="tr") ? "Demo Aday 1" : "Demo Candidate 1";
+    $("candSource").value = "LinkedIn";
+    $("candTags").value = "Senior, FinTech";
+    $("candCV").value = (LANG==="tr")
+      ? "7 yıl iş analizi, Agile/Scrum, API entegrasyonları, SQL raporlama. Jira/Confluence kullandı. KYC/AML süreçleri tecrübesi."
+      : "7 years BA, Agile/Scrum, API integrations, SQL reporting. Used Jira/Confluence. Experience with KYC/AML flows.";
+    $("candLI").value = "";
+    saveCandidate();
+
+    $("candName").value = (LANG==="tr") ? "Demo Aday 2" : "Demo Candidate 2";
+    $("candSource").value = "Referral";
+    $("candTags").value = "Mid, Product";
+    $("candCV").value = (LANG==="tr")
+      ? "3 yıl ürün/analiz, user story yazımı, acceptance criteria. API geçti ama SQL yok. Jira var. KYC yok."
+      : "3 years product/analysis, user stories, acceptance criteria. Mentions API but no SQL. Jira yes. No KYC.";
+    $("candLI").value = "";
+    saveCandidate();
+  }
+  showTab("jobs");
+});
+$("goMatch").addEventListener("click", ()=>{ closeGuide(); showTab("match"); });
+
+// Banner
+function syncBanner(){
+  $("banner").style.display = DB.ui.bannerHidden ? "none" : "flex";
+}
+$("hideBanner").addEventListener("click", ()=>{
+  DB.ui.bannerHidden = true; saveDB(); syncBanner();
+});
 
 /* =========================
    Initial render
@@ -1374,7 +1667,6 @@ function renderAll(){
   $("pipeJob").innerHTML = $("jobSelect").innerHTML;
   $("cmpJob").innerHTML = $("jobSelect").innerHTML;
 
-  // default selections
   if($("jobSelect").value){
     $("matchJob").value = $("jobSelect").value;
     $("pipeJob").value = $("jobSelect").value;
@@ -1382,9 +1674,16 @@ function renderAll(){
   }
   renderPipeline();
   renderCompareDropdowns();
+  syncBanner();
 }
+
 renderAll();
 showTab("jobs");
+
+// show guide first time
+if(!DB.ui.guideSeen){
+  setTimeout(openGuide, 250);
+}
 </script>
 </body>
 </html>
